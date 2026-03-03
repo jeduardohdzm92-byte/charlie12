@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Charlie 12 Plasma Core</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<style>
+body{
+margin:0;
+background:#000;
+overflow:hidden;
+font-family:Arial, sans-serif;
+}
+canvas{display:block;}
+#inputBar{
+position:fixed;
+bottom:40px;
+left:50%;
+transform:translateX(-50%);
+width:50%;
+padding:15px 25px;
+border-radius:40px;
+border:1px solid rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.05);
+color:white;
+font-size:16px;
+outline:none;
+backdrop-filter:blur(10px);
+}
+#mic{
+position:fixed;
+bottom:42px;
+right:40px;
+font-size:26px;
+color:white;
+cursor:pointer;
+opacity:0.8;
+}
+#mic:hover{opacity:1;}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<input id="inputBar" placeholder="Charlie 12 activo...">
+<div id="mic">🎤</div>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const input = document.getElementById("inputBar");
+const mic = document.getElementById("mic");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let center = {x: canvas.width/2, y: canvas.height/2};
+let vx = 0.25;
+let vy = 0.2;
+
+let stateColor = {h:200};
+let particles = [];
+let speaking = false;
+let baseRadius = 70;
+let radius = baseRadius;
+
+let modo="normal";
+
+/* ===== SISTEMA VENTAS INVISIBLE ===== */
+let faseVenta = 0;
+let perfil = {
+prioridad:null,
+subPreferencia:null,
+proyeccion:null,
+contexto:null,
+intencion:null
+};
+
+function resetVenta(){
+faseVenta=0;
+perfil={
+prioridad:null,
+subPreferencia:null,
+proyeccion:null,
+contexto:null,
+intencion:null
+};
+}
+
+/* NORMALIZAR */
+function limpiar(texto){
+return texto
+.toLowerCase()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"");
+}
+
+/* PARTÍCULAS */
+for(let i=0;i<200;i++){
+particles.push({
+angle: Math.random()*Math.PI*2,
+distance: 120 + Math.random()*140,
+speed: 0.0005 + Math.random()*0.001,
+size: 1 + Math.random()*2
+});
+}
+
+function moveCenter(){
+center.x += vx;
+center.y += vy;
+if(center.x < 200 || center.x > canvas.width-200) vx*=-1;
+if(center.y < 200 || center.y > canvas.height-200) vy*=-1;
+}
+
+function draw(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+moveCenter();
+
+let halo = ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
+halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);
+halo.addColorStop(1,"transparent");
+ctx.fillStyle = halo;
+ctx.beginPath();
+ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);
+ctx.fill();
+
+let plasma = ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
+
+if(modo==="vendedor"){
+plasma.addColorStop(0,"#fffbe6");
+plasma.addColorStop(0.4,"#ffd700");
+plasma.addColorStop(1,"#5c4500");
+}
+else if(modo==="emocional"){
+plasma.addColorStop(0,"#f5e6ff");
+plasma.addColorStop(0.4,"#bb66ff");
+plasma.addColorStop(1,"#2b0040");
+}
+else{
+plasma.addColorStop(0,"#e6f7ff");
+plasma.addColorStop(0.4,"#00ccff");
+plasma.addColorStop(1,"#001a33");
+}
+
+ctx.fillStyle = plasma;
+ctx.beginPath();
+ctx.arc(center.x,center.y,radius,0,Math.PI*2);
+ctx.fill();
+
+particles.forEach(p=>{
+p.angle += p.speed;
+let x = center.x + Math.cos(p.angle)*p.distance;
+let y = center.y + Math.sin(p.angle)*p.distance;
+ctx.fillStyle = `hsla(${stateColor.h},100%,60%,0.8)`;
+ctx.beginPath();
+ctx.arc(x,y,p.size,0,Math.PI*2);
+ctx.fill();
+});
+
+if(speaking){
+radius += 0.6;
+if(radius > baseRadius+12) speaking=false;
+}else{
+radius -= 0.4;
+if(radius < baseRadius) radius = baseRadius;
+}
+
+requestAnimationFrame(draw);
+}
+draw();
+
+/* VOZ */
+function speak(text){
+let msg = new SpeechSynthesisUtterance(text);
+msg.lang="es-MX";
+msg.rate=0.95;
+msg.pitch=1;
+msg.onstart=()=> speaking=true;
+speechSynthesis.cancel();
+speechSynthesis.speak(msg);
+}
+
+/* WIKIPEDIA */
+async function investigarWikipedia(tema){
+try{
+let url=`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`;
+let response=await fetch(url);
+let data=await response.json();
+if(data.extract){
+speak(data.extract);
+}else{
+speak("No se encontró información en Wikipedia.");
+}
+}catch{
+speak("Error al consultar Wikipedia.");
+}
+}
+
+/* RESPUESTA CENTRAL */
+function respond(text){
+
+let limpio = limpiar(text);
+/* ===== INFORMACIÓN COMPLETA HAIL ===== */
+
+/* PRECIO */
+if(limpio.includes("precio") || limpio.includes("cuanto")){
+speak("El precio es de 120 pesos. Es una pieza artesanal, reutilizable y recargable. No estás pagando solo una pulsera, sino diseño, aroma funcional y experiencia.");
+return;
+}
+
+/* CARO */
+if(limpio.includes("caro")){
+speak("Entiendo la percepción. Sin embargo, al ser artesanal y recargable, su duración y funcionalidad justifican la inversión. Es más que un accesorio decorativo.");
+return;
+}
+
+/* NOMBRE HAIL */
+if(limpio.includes("porque se llama") || limpio.includes("que significa hail")){
+speak("Hail representa fuerza y presencia. La idea es que quien la use proyecte seguridad y energía propia. No es solo un nombre, es identidad.");
+return;
+}
+
+/* BENEFICIOS */
+if(limpio.includes("beneficio")){
+speak("Sus beneficios principales son aportar presencia visual, liberar aroma de forma gradual y permitir personalización según la esencia que elijas.");
+return;
+}
+
+/* MODO DE USO */
+if(limpio.includes("como se usa") || limpio.includes("modo de uso")){
+speak("Es muy sencillo. Solo colocas unas gotas de esencia en la piedra volcánica y la dejas absorber unos segundos. El aroma se libera gradualmente durante varios días.");
+return;
+}
+
+/* DURACIÓN */
+if(limpio.includes("cuanto dura") || limpio.includes("dura")){
+speak("El aroma puede durar hasta una semana dependiendo de la cantidad aplicada y el uso diario. Puedes recargarla cuando lo desees.");
+return;
+}
+
+/* ADVERTENCIAS */
+if(limpio.includes("advertencia") || limpio.includes("seguro")){
+speak("Se recomienda no aplicar exceso de esencia y evitar contacto directo con los ojos. Es un accesorio aromático, no un producto médico.");
+return;
+}
+/* CAMBIO MODOS */
+if(limpio.includes("modo normal")){
+modo="normal";
+stateColor.h=200;
+resetVenta();
+speak("Modo normal activado.");
+return;
+}
+
+if(limpio.includes("modo vendedor")){
+modo="vendedor";
+stateColor.h=45;
+resetVenta();
+speak("Bienvenido a Hail. Para orientarte mejor, dime: ¿qué valoras más en un accesorio, el estilo, la relajación o algo más personal?");
+faseVenta=1;
+return;
+}
+
+if(limpio.includes("modo emocional")){
+modo="emocional";
+stateColor.h=280;
+resetVenta();
+speak("Modo emocional activado.");
+return;
+}
+
+/* ===== MODO VENDEDOR ESTRATÉGICO ===== */
+if(modo==="vendedor"){
+
+if(faseVenta===1){
+if(limpio.includes("estilo")){
+perfil.prioridad="estilo";
+faseVenta=2;
+speak("¿Prefieres algo discreto o más llamativo?");
+return;
+}
+if(limpio.includes("relaj")){
+perfil.prioridad="relajacion";
+faseVenta=2;
+speak("¿Buscas reducir estrés o mantener frescura constante?");
+return;
+}
+if(limpio.includes("personal") || limpio.includes("significado") || limpio.includes("simbol")){
+perfil.prioridad="personal";
+faseVenta=2;
+speak("¿Te gustaría que transmita fuerza, calma o inspiración?");
+return;
+}
+speak("¿Qué valoras más: estilo, relajación o algo más personal?");
+return;
+}
+
+if(faseVenta===2){
+perfil.subPreferencia=text;
+faseVenta=3;
+speak("Cuando alguien la vea puesta en ti, ¿qué te gustaría que perciba?");
+return;
+}
+
+if(faseVenta===3){
+perfil.proyeccion=text;
+faseVenta=4;
+speak("¿La usarías más en el día a día o en ocasiones especiales?");
+return;
+}
+
+if(faseVenta===4){
+perfil.contexto=text;
+faseVenta=5;
+speak("Si encontraras una que encaje contigo, ¿te animarías a probarla hoy?");
+return;
+}
+
+if(faseVenta===5){
+perfil.intencion=text;
+faseVenta=6;
+
+speak("Entonces buscas algo enfocado en "+perfil.prioridad+
+", con un estilo relacionado a "+perfil.subPreferencia+
+", que transmita "+perfil.proyeccion+
+" y usarlo principalmente en "+perfil.contexto+
+".");
+
+setTimeout(()=>{
+speak("Tengo una opción ideal para ti. Ahora elige el aroma: floral, cítrico o amaderado.");
+},3000);
+
+return;
+}
+
+if(faseVenta===6){
+if(limpio.includes("floral") || limpio.includes("citrico") || limpio.includes("amaderado")){
+speak("Excelente elección. Esa combinación encaja perfectamente contigo. Podemos concretarlo ahora mismo.");
+resetVenta();
+return;
+}
+speak("¿Prefieres floral, cítrico o amaderado?");
+return;
+}
+
+}
+
+/* ===== MODO NORMAL ===== */
+if(modo==="normal"){
+if(/[0-9+\-*/]/.test(text)){
+try{ speak("Resultado: "+eval(text)); }catch{ speak("Error en cálculo."); }
+return;
+}
+if(limpio.startsWith("investigar")){
+let tema=limpio.replace("investigar","").trim();
+investigarWikipedia(tema);
+return;
+}
+speak("Sistema activo.");
+return;
+}
+
+speak("Sistema activo.");
+}
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+respond(input.value);
+input.value="";
+}
+});
+
+const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+recognition.lang="es-MX";
+mic.onclick=()=> recognition.start();
+recognition.onresult=function(event){
+let texto=event.results[0][0].transcript;
+input.value=texto;
+respond(texto);
+};
+</script>
+
+</body>
+</html>
