@@ -50,6 +50,42 @@ opacity:0.8;
 opacity:1;
 }
 
+#calc{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.8);
+padding:20px;
+border-radius:15px;
+display:none;
+}
+
+#calcScreen{
+width:100%;
+height:40px;
+margin-bottom:10px;
+font-size:20px;
+background:#000;
+color:#0f0;
+border:none;
+padding:5px;
+}
+
+.calcGrid{
+display:grid;
+grid-template-columns:repeat(4,60px);
+gap:8px;
+}
+
+.calcGrid button{
+height:40px;
+background:#222;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
 </style>
 </head>
 
@@ -58,7 +94,42 @@ opacity:1;
 <canvas id="c"></canvas>
 <input id="inputBar" placeholder="Charlie activo...">
 <div id="mic">🎤</div>
+<div id="calc">
 
+<button onclick="cerrarCalculadora()" style="float:right">✖</button>
+
+<input id="calcScreen" readonly>
+
+<div class="calcGrid">
+
+<button onclick="calcAdd('7')">7</button>
+<button onclick="calcAdd('8')">8</button>
+<button onclick="calcAdd('9')">9</button>
+<button onclick="calcAdd('/')">÷</button>
+
+<button onclick="calcAdd('4')">4</button>
+<button onclick="calcAdd('5')">5</button>
+<button onclick="calcAdd('6')">6</button>
+<button onclick="calcAdd('*')">×</button>
+
+<button onclick="calcAdd('1')">1</button>
+<button onclick="calcAdd('2')">2</button>
+<button onclick="calcAdd('3')">3</button>
+<button onclick="calcAdd('-')">−</button>
+
+<button onclick="calcAdd('0')">0</button>
+<button onclick="calcAdd('.')">.</button>
+<button onclick="calcResult()">=</button>
+<button onclick="calcAdd('+')">+</button>
+
+<button onclick="calcAdd('Math.sqrt(')">√</button>
+<button onclick="calcAdd('Math.sin(')">sin</button>
+<button onclick="calcAdd('Math.cos(')">cos</button>
+<button onclick="calcClear()">C</button>
+
+</div>
+
+</div>
 <script>
 
 /* =========================
@@ -75,8 +146,28 @@ canvas.height = window.innerHeight;
 
 let center = {x: canvas.width/2, y: canvas.height/2};
 
-let vx = 0.25;
-let vy = 0.2;
+/* ===== ARREGLAR RESIZE ===== */
+
+window.addEventListener("resize", () => {
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+center = {
+x: canvas.width/2,
+y: canvas.height/2
+};
+
+});
+
+let vx = 0.2;
+let vy = 0.15;
+
+vx += (Math.random()-0.5)*0.02;
+vy += (Math.random()-0.5)*0.02;
+
+vx = Math.max(Math.min(vx,0.5),-0.5);
+vy = Math.max(Math.min(vy,0.5),-0.5);
 
 let speaking = false;
 
@@ -231,9 +322,8 @@ ctx.fill();
 
 if(speaking){
 
-radius += 0.6;
-
-if(radius > baseRadius+12) speaking=false;
+radius = baseRadius + Math.sin(Date.now()*0.006)*10;
+if(radius > baseRadius+14) speaking=false;
 
 }else{
 
@@ -253,18 +343,21 @@ draw();
 VOZ
 ========================= */
 
-function speak(text){
+let recognition;
 
-let msg = new SpeechSynthesisUtterance(text);
+if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
-msg.lang="es-MX";
-msg.rate=0.95;
-msg.pitch=1;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-msg.onstart=()=> speaking=true;
+recognition = new SpeechRecognition();
 
-speechSynthesis.cancel();
-speechSynthesis.speak(msg);
+recognition.lang="es-MX";
+
+}else{
+
+mic.style.display="none";
+
+console.log("Reconocimiento de voz no soportado");
 
 }
 
@@ -276,11 +369,26 @@ function detectarIntencion(text){
 
 let limpio = limpiar(text);
 
-if(/precio|cuanto/.test(limpio)) return "precio";
-if(/beneficio/.test(limpio)) return "beneficios";
-if(/modo vendedor/.test(limpio)) return "modo_vendedor";
-if(/modo normal/.test(limpio)) return "modo_normal";
-if(/investigar/.test(limpio)) return "investigar";
+if(/calculadora|calcular/.test(limpio))
+return "calculadora";
+
+if(/cerrar calculadora|ocultar calculadora/.test(limpio))
+return "cerrar_calc";
+
+if(/precio|cuanto cuesta|cuanto vale|costo/.test(limpio))
+return "precio";
+
+if(/beneficio|para que sirve|funciona/.test(limpio))
+return "beneficios";
+
+if(/activar modo vendedor|modo vendedor/.test(limpio))
+return "modo_vendedor";
+
+if(/modo normal|salir vendedor/.test(limpio))
+return "modo_normal";
+
+if(/investigar|buscar|que es/.test(limpio))
+return "investigar";
 
 return "desconocido";
 
@@ -318,16 +426,65 @@ speak("Error consultando Wikipedia.");
 }
 
 }
+/* =========================
+MEMORIA DE CONVERSACIÓN
+========================= */
 
+let conversacion = [];
+
+let ultimoTema = "";
+
+function recordar(text){
+
+conversacion.push(text);
+
+if(conversacion.length > 10){
+
+conversacion.shift();
+
+}
+
+}
+/* =========================
+VOZ SINTETIZADA
+========================= */
+
+function speak(text){
+
+speaking = true;
+
+let msg = new SpeechSynthesisUtterance(text);
+
+msg.lang = "es-MX";
+
+speechSynthesis.speak(msg);
+
+}
 /* =========================
 RESPUESTA
 ========================= */
 
 function respond(text){
 
+recordar(text);
+
 let intencion = detectarIntencion(text);
 
 switch(intencion){
+
+case "calculadora":
+
+abrirCalculadora();
+
+break;
+
+case "cerrar_calc":
+
+cerrarCalculadora();
+
+speak("Calculadora cerrada");
+
+break;
 
 case "precio":
 
@@ -363,7 +520,19 @@ break;
 
 case "investigar":
 
-let tema = limpiar(text).replace("investigar","").trim();
+let limpio = limpiar(text);
+
+let tema = limpio
+.replace("investigar","")
+.replace("que es","")
+.replace("buscar","")
+.trim();
+
+if(tema===""){
+tema = ultimoTema;
+}
+
+ultimoTema = tema;
 
 investigarWikipedia(tema);
 
@@ -397,13 +566,26 @@ input.value="";
 VOZ
 ========================= */
 
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-
+if(!recognition){
+recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang="es-MX";
+}
 
-recognition.continuous = true;
+let escuchando = false;
 
-mic.onclick=()=> recognition.start();
+mic.onclick = () => {
+
+if(escuchando){
+recognition.stop();
+escuchando = false;
+mic.innerText="🎤";
+}else{
+recognition.start();
+escuchando = true;
+mic.innerText="🛑";
+}
+
+};
 
 recognition.onresult=function(event){
 
@@ -415,10 +597,61 @@ respond(texto);
 
 };
 
+/* =========================
+CALCULADORA
+========================= */
+
+let calc = document.getElementById("calc");
+let calcScreen = document.getElementById("calcScreen");
+
+function calcAdd(v){
+calcScreen.value += v;
+}
+
+function calcResult(){
+
+try{
+
+let r = eval(calcScreen.value);
+
+calcScreen.value = r;
+
+speak("Resultado " + r);
+
+}catch{
+
+calcScreen.value="Error";
+
+}
+
+}
+
+function calcClear(){
+calcScreen.value="";
+}
+
+function abrirCalculadora(){
+
+calc.style.display="block";
+
+speak("Calculadora activada");
+
+}
+
+function cerrarCalculadora(){
+
+calc.style.display="none";
+
+}
+document.addEventListener("click",(e)=>{
+
+if(e.target.id==="calc"){
+cerrarCalculadora();
+}
+
+});
 </script>
 
-</body>
-</html>
 </body>
 </html>
 
