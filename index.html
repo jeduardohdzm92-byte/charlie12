@@ -232,7 +232,7 @@ if(tipo==="normal") stateColor.h = 200;
 if(tipo==="ventas") stateColor.h = 45;
 if(tipo==="emocional") stateColor.h = 280;
 if(tipo==="energia") stateColor.h = 10;
-
+if(tipo==="razista") stateColor.h = 0;
 }
 
 /* =========================
@@ -343,20 +343,18 @@ draw();
 VOZ
 ========================= */
 
-let recognition;
+let recognition = null;
 
 if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 recognition = new SpeechRecognition();
+recognition.lang = "es-MX";
 
-recognition.lang="es-MX";
+} else {
 
-}else{
-
-mic.style.display="none";
-
+mic.style.display = "none";
 console.log("Reconocimiento de voz no soportado");
 
 }
@@ -389,6 +387,12 @@ return "modo_normal";
 
 if(/investigar|buscar|que es/.test(limpio))
 return "investigar";
+
+if(/modo razista|activar razista|modo razista/.test(limpio))
+return "modo_razista";
+
+if(/chiste|hazme reir|cuenta algo gracioso/.test(limpio))
+return "chiste";
 
 return "desconocido";
 
@@ -446,6 +450,31 @@ conversacion.shift();
 
 }
 /* =========================
+CHISTES
+========================= */
+
+const chistes = [
+
+"¿en que se diferencia un judio a una pizza      la pizza nogrita en el horno.",
+
+"¿Qué hace una abeja en el gimnasio? Zum-ba.",
+
+"¿Por qué los programadores confunden Halloween y Navidad? Porque OCT 31 = DEC 25.",
+
+"¿Qué le dice un bit al otro bit? Nos vemos en el bus.",
+
+"¿Por qué el libro de matemáticas estaba triste? Porque tenía demasiados problemas."
+
+];
+
+function contarChiste(){
+
+let chiste = chistes[Math.floor(Math.random()*chistes.length)];
+
+speak(chiste);
+
+}
+/* =========================
 VOZ SINTETIZADA
 ========================= */
 
@@ -495,6 +524,30 @@ break;
 case "beneficios":
 
 speak("Es una pulsera aromática reutilizable.");
+
+break;
+
+case "modo_razista":
+
+modo="razista";
+
+setEmotion("razista");
+
+speak("Modo razista activado.");
+
+break;
+
+case "chiste":
+
+if(modo==="razista"){
+
+contarChiste();
+
+}else{
+
+speak("Activa primero el modo humor.");
+
+}
 
 break;
 
@@ -565,11 +618,6 @@ input.value="";
 /* =========================
 VOZ
 ========================= */
-
-if(!recognition){
-recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.lang="es-MX";
-}
 
 let escuchando = false;
 
