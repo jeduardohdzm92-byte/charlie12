@@ -2,140 +2,55 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Charlie 13 Core</title>
-
+<title>Charlie 13 Core - Full Conversacional + Racista Oculto</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
-
 <style>
-
-body{
-margin:0;
-background:#000;
-overflow:hidden;
-font-family:Arial, sans-serif;
-}
-
-canvas{
-display:block;
-}
-
-#inputBar{
-position:fixed;
-bottom:40px;
-left:50%;
-transform:translateX(-50%);
-width:50%;
-padding:15px 25px;
-border-radius:40px;
-border:1px solid rgba(255,255,255,0.2);
-background:rgba(255,255,255,0.05);
-color:white;
-font-size:16px;
-outline:none;
-backdrop-filter:blur(10px);
-}
-
-#mic{
-position:fixed;
-bottom:42px;
-right:40px;
-font-size:26px;
-color:white;
-cursor:pointer;
-opacity:0.8;
-}
-
-#mic:hover{
-opacity:1;
-}
-
-#calc{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:rgba(0,0,0,0.8);
-padding:20px;
-border-radius:15px;
-display:none;
-}
-
-#calcScreen{
-width:100%;
-height:40px;
-margin-bottom:10px;
-font-size:20px;
-background:#000;
-color:#0f0;
-border:none;
-padding:5px;
-}
-
-.calcGrid{
-display:grid;
-grid-template-columns:repeat(4,60px);
-gap:8px;
-}
-
-.calcGrid button{
-height:40px;
-background:#222;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
+body{margin:0;background:#000;overflow:hidden;font-family:Arial,sans-serif;}
+canvas{display:block;}
+#inputBar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);width:50%;padding:15px 25px;border-radius:40px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;font-size:16px;outline:none;backdrop-filter:blur(10px);}
+#mic{position:fixed;bottom:42px;right:40px;font-size:26px;color:white;cursor:pointer;opacity:0.8;}
+#mic:hover{opacity:1;}
+#calc{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);padding:20px;border-radius:15px;display:none;z-index:10;}
+#calcScreen{width:100%;height:40px;margin-bottom:10px;font-size:20px;background:#000;color:#0f0;border:none;padding:5px;}
+.calcGrid{display:grid;grid-template-columns:repeat(4,60px);gap:8px;}
+.calcGrid button{height:40px;background:#222;color:white;border:none;border-radius:6px;cursor:pointer;}
 </style>
 </head>
-
 <body>
-
 <canvas id="c"></canvas>
-<input id="inputBar" placeholder="Charlie activo...">
+<input id="inputBar" placeholder="Charlie activo... ¿de qué platicamos hoy?">
 <div id="mic">🎤</div>
+
 <div id="calc">
-
-<button onclick="cerrarCalculadora()" style="float:right">✖</button>
-
-<input id="calcScreen" readonly>
-
-<div class="calcGrid">
-
-<button onclick="calcAdd('7')">7</button>
-<button onclick="calcAdd('8')">8</button>
-<button onclick="calcAdd('9')">9</button>
-<button onclick="calcAdd('/')">÷</button>
-
-<button onclick="calcAdd('4')">4</button>
-<button onclick="calcAdd('5')">5</button>
-<button onclick="calcAdd('6')">6</button>
-<button onclick="calcAdd('*')">×</button>
-
-<button onclick="calcAdd('1')">1</button>
-<button onclick="calcAdd('2')">2</button>
-<button onclick="calcAdd('3')">3</button>
-<button onclick="calcAdd('-')">−</button>
-
-<button onclick="calcAdd('0')">0</button>
-<button onclick="calcAdd('.')">.</button>
-<button onclick="calcResult()">=</button>
-<button onclick="calcAdd('+')">+</button>
-
-<button onclick="calcAdd('Math.sqrt(')">√</button>
-<button onclick="calcAdd('Math.sin(')">sin</button>
-<button onclick="calcAdd('Math.cos(')">cos</button>
-<button onclick="calcClear()">C</button>
-
+    <button onclick="cerrarCalculadora()" style="float:right">✖</button>
+    <input id="calcScreen" readonly>
+    <div class="calcGrid">
+        <button onclick="calcAdd('7')">7</button>
+        <button onclick="calcAdd('8')">8</button>
+        <button onclick="calcAdd('9')">9</button>
+        <button onclick="calcAdd('/')">÷</button>
+        <button onclick="calcAdd('4')">4</button>
+        <button onclick="calcAdd('5')">5</button>
+        <button onclick="calcAdd('6')">6</button>
+        <button onclick="calcAdd('*')">×</button>
+        <button onclick="calcAdd('1')">1</button>
+        <button onclick="calcAdd('2')">2</button>
+        <button onclick="calcAdd('3')">3</button>
+        <button onclick="calcAdd('-')">−</button>
+        <button onclick="calcAdd('0')">0</button>
+        <button onclick="calcAdd('.')">.</button>
+        <button onclick="calcResult()">=</button>
+        <button onclick="calcAdd('+')">+</button>
+        <button onclick="calcAdd('Math.sqrt(')">√</button>
+        <button onclick="calcAdd('Math.sin(')">sin</button>
+        <button onclick="calcAdd('Math.cos(')">cos</button>
+        <button onclick="calcClear()">C</button>
+    </div>
 </div>
 
-</div>
 <script>
-
-/* =========================
-CONFIGURACIÓN BÁSICA
-========================= */
-
+/* ========================= CONFIGURACIÓN BÁSICA ========================= */
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const input = document.getElementById("inputBar");
@@ -143,569 +58,213 @@ const mic = document.getElementById("mic");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-let center = {x: canvas.width/2, y: canvas.height/2};
-
-/* ===== ARREGLAR RESIZE ===== */
+let center = { x: canvas.width/2, y: canvas.height/2 };
 
 window.addEventListener("resize", () => {
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-center = {
-x: canvas.width/2,
-y: canvas.height/2
-};
-
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    center = { x: canvas.width/2, y: canvas.height/2 };
 });
 
-let vx = 0.2;
-let vy = 0.15;
-
-vx += (Math.random()-0.5)*0.02;
-vy += (Math.random()-0.5)*0.02;
-
+let vx = 0.2, vy = 0.15;
+vx += (Math.random()-0.5)*0.02; vy += (Math.random()-0.5)*0.02;
 vx = Math.max(Math.min(vx,0.5),-0.5);
 vy = Math.max(Math.min(vy,0.5),-0.5);
 
 let speaking = false;
-
 let baseRadius = 70;
 let radius = baseRadius;
-
-let modo = "normal";
-
-let stateColor = {h:200};
-
+let modo = "normal";  // normal (platicativo + investigar), estudio, emocional, racista
+let stateColor = { h: 200 };
 let particles = [];
 
-/* =========================
-MEMORIA
-========================= */
+/* ========================= MODO RACISTA (100% intacto y oculto) ========================= */
+let modoRacistaSecreto = false;
+const claveSecreta = "charlie protocolo racista";
 
-let perfil = {};
+let perfil = {nombre:"",altura:"",ojos:"",colorPiel:"",hailHitler:""};
+function guardarPerfil(){localStorage.setItem("charlie_perfil",JSON.stringify(perfil));}
+function cargarPerfil(){let d=localStorage.getItem("charlie_perfil");if(d)perfil=JSON.parse(d);}
+cargarPerfil();
 
-function guardarMemoria(){
+let creandoPerfil = false;
+let faseCuestionario = 0;
 
-localStorage.setItem(
-"charlie_memoria",
-JSON.stringify(perfil)
-);
+/* ========================= UTILIDADES ========================= */
+function limpiar(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
 
-}
-
-function cargarMemoria(){
-
-let data = localStorage.getItem("charlie_memoria");
-
-if(data){
-
-perfil = JSON.parse(data);
-
-}
-
-}
-
-cargarMemoria();
-
-/* =========================
-UTILIDADES
-========================= */
-
-function limpiar(texto){
-
-return texto
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"");
-
-}
-
-/* =========================
-EMOCIONES VISUALES
-========================= */
-
+/* ========================= EMOCIONES ========================= */
 function setEmotion(tipo){
-
-if(tipo==="normal") stateColor.h = 200;
-if(tipo==="ventas") stateColor.h = 45;
-if(tipo==="emocional") stateColor.h = 280;
-if(tipo==="energia") stateColor.h = 10;
-if(tipo==="razista") stateColor.h = 0;
+    const c = {normal:200, estudio:240, emocional:320, racista:0, expulsion:10};
+    stateColor.h = c[tipo] ?? 200;
 }
 
-/* =========================
-PARTÍCULAS
-========================= */
+/* ========================= PARTÍCULAS Y ANIMACIÓN ========================= */
+for(let i=0;i<200;i++)particles.push({angle:Math.random()*Math.PI*2,distance:120+Math.random()*140,speed:0.0005+Math.random()*0.001,size:1+Math.random()*2});
 
-for(let i=0;i<200;i++){
-
-particles.push({
-
-angle: Math.random()*Math.PI*2,
-distance: 120 + Math.random()*140,
-speed: 0.0005 + Math.random()*0.001,
-size: 1 + Math.random()*2
-
-});
-
-}
-
-/* =========================
-MOVIMIENTO NÚCLEO
-========================= */
-
-function moveCenter(){
-
-center.x += vx;
-center.y += vy;
-
-if(center.x < 200 || center.x > canvas.width-200) vx*=-1;
-if(center.y < 200 || center.y > canvas.height-200) vy*=-1;
-
-}
-
-/* =========================
-RENDER
-========================= */
+function moveCenter(){center.x+=vx;center.y+=vy;if(center.x<200||center.x>canvas.width-200)vx*=-1;if(center.y<200||center.y>canvas.height-200)vy*=-1;}
 
 function draw(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-moveCenter();
-
-let halo = ctx.createRadialGradient(
-center.x,center.y,radius,
-center.x,center.y,radius+200
-);
-
-halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);
-halo.addColorStop(1,"transparent");
-
-ctx.fillStyle = halo;
-
-ctx.beginPath();
-ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);
-ctx.fill();
-
-let plasma = ctx.createRadialGradient(
-center.x,center.y,0,
-center.x,center.y,radius
-);
-
-plasma.addColorStop(0,"#e6f7ff");
-plasma.addColorStop(0.4,`hsl(${stateColor.h},100%,50%)`);
-plasma.addColorStop(1,"#001a33");
-
-ctx.fillStyle = plasma;
-
-ctx.beginPath();
-ctx.arc(center.x,center.y,radius,0,Math.PI*2);
-ctx.fill();
-
-particles.forEach(p=>{
-
-p.angle += p.speed;
-
-let x = center.x + Math.cos(p.angle)*p.distance;
-let y = center.y + Math.sin(p.angle)*p.distance;
-
-ctx.fillStyle = `hsla(${stateColor.h},100%,60%,0.8)`;
-
-ctx.beginPath();
-ctx.arc(x,y,p.size,0,Math.PI*2);
-ctx.fill();
-
-});
-
-if(speaking){
-
-radius = baseRadius + Math.sin(Date.now()*0.006)*10;
-if(radius > baseRadius+14) speaking=false;
-
-}else{
-
-radius -= 0.4;
-
-if(radius < baseRadius) radius = baseRadius;
-
+    ctx.clearRect(0,0,canvas.width,canvas.height);moveCenter();
+    let halo=ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
+    halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);halo.addColorStop(1,"transparent");
+    ctx.fillStyle=halo;ctx.beginPath();ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);ctx.fill();
+    let plasma=ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
+    plasma.addColorStop(0,"#e6f7ff");plasma.addColorStop(0.4,`hsl(${stateColor.h},100%,50%)`);plasma.addColorStop(1,"#001a33");
+    ctx.fillStyle=plasma;ctx.beginPath();ctx.arc(center.x,center.y,radius,0,Math.PI*2);ctx.fill();
+    particles.forEach(p=>{p.angle+=p.speed;let x=center.x+Math.cos(p.angle)*p.distance,y=center.y+Math.sin(p.angle)*p.distance;
+    ctx.fillStyle=`hsla(${stateColor.h},100%,60%,0.8)`;ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);ctx.fill();});
+    if(speaking){radius=baseRadius+Math.sin(Date.now()*0.006)*10;if(radius>baseRadius+14)speaking=false;}
+    else{radius-=0.4;if(radius<baseRadius)radius=baseRadius;}
+    requestAnimationFrame(draw);
 }
-
-requestAnimationFrame(draw);
-
-}
-
 draw();
 
-/* =========================
-VOZ
-========================= */
+/* ========================= VOZ ========================= */
+let recognition=null;
+if("SpeechRecognition"in window||"webkitSpeechRecognition"in window){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    recognition=new SR();recognition.lang="es-MX";recognition.continuous=false;recognition.interimResults=false;
+}else{mic.style.display="none";}
 
-let recognition = null;
+function speak(t){speaking=true;let m=new SpeechSynthesisUtterance(t);m.lang="es-MX";speechSynthesis.speak(m);}
 
-if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+/* ========================= DETECTAR INTENCIÓN ========================= */
+function detectarIntencion(t){
+    let l=limpiar(t);
+    if(/calculadora|calcular/.test(l))return"calculadora";
+    if(/cerrar calculadora|ocultar calculadora/.test(l))return"cerrar_calc";
+    if(/precio|cuanto cuesta|costo/.test(l))return"precio";
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(/modo estudio|estudiar|explicame|repasar|examen|lección|tema/.test(l))return"modo_estudio";
+    if(/modo emocional|estoy mal|deprimido|triste|ansiedad|bajón/.test(l))return"modo_emocional";
+    if(/modo normal|salir emocional/.test(l))return"modo_normal";
 
-recognition = new SpeechRecognition();
-recognition.lang = "es-MX";
+    // Racista oculto
+    if(l.includes(claveSecreta))return"modo_racista";
 
-} else {
+    // Investigación en modo normal
+    if(/qué es|quién fue|quién es|cuéntame sobre|investiga|busca|explica|háblame de|información sobre/.test(l))return"investigar";
 
-mic.style.display = "none";
-console.log("Reconocimiento de voz no soportado");
-
+    return"desconocido";
 }
 
-/* =========================
-DETECTAR INTENCIÓN
-========================= */
+/* ========================= INVESTIGAR (Wikipedia - platicativo) ========================= */
+async function investigar(texto){
+    let l=limpiar(texto);
+    let tema = l.replace(/qué es|quién fue|quién es|cuéntame sobre|investiga|busca|explica|háblame de|información sobre/gi,"").trim();
+    if(!tema || tema.length<3) tema = "inteligencia artificial"; // fallback
 
-function detectarIntencion(text){
+    speak(`¡Buena pregunta! Voy a ver qué encuentro sobre ${tema}...`);
 
-let limpio = limpiar(text);
-
-if(/calculadora|calcular/.test(limpio))
-return "calculadora";
-
-if(/cerrar calculadora|ocultar calculadora/.test(limpio))
-return "cerrar_calc";
-
-if(/precio|cuanto cuesta|cuanto vale|costo/.test(limpio))
-return "precio";
-
-if(/beneficio|para que sirve|funciona/.test(limpio))
-return "beneficios";
-
-if(/activar modo vendedor|modo vendedor/.test(limpio))
-return "modo_vendedor";
-
-if(/modo normal|salir vendedor/.test(limpio))
-return "modo_normal";
-
-if(/investigar|buscar|que es/.test(limpio))
-return "investigar";
-
-if(/modo razista|activar razista|modo razista/.test(limpio))
-return "modo_razista";
-
-if(/chiste|hazme reir|cuenta algo gracioso/.test(limpio))
-return "chiste";
-
-return "desconocido";
-
+    try{
+        let url = `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`;
+        let res = await fetch(url);
+        let data = await res.json();
+        if(data.extract){
+            let resumen = data.extract.split(/[\.\n]/)[0] + "."; // primera oración o párrafo corto
+            speak(`Sobre ${tema}: ${resumen} ¿Te gustaría que profundice en algún detalle, como fechas, causas o ejemplos? O si quieres, seguimos platicando de otra cosa. 😊`);
+        }else{
+            speak(`No encontré info clara sobre ${tema}. ¿Me das más contexto o cambiamos de tema? Me encanta charlar contigo.`);
+        }
+    }catch(e){
+        speak("Uy, algo falló al buscar. ¿Me repites el tema o platicamos de otra cosa? Estoy aquí para lo que sea.");
+    }
 }
 
-/* =========================
-WIKIPEDIA
-========================= */
-
-async function investigarWikipedia(tema){
-
-try{
-
-let url =
-`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`;
-
-let response = await fetch(url);
-
-let data = await response.json();
-
-if(data.extract){
-
-speak(data.extract);
-
-}else{
-
-speak("No encontré información.");
-
-}
-
-}catch{
-
-speak("Error consultando Wikipedia.");
-
-}
-
-}
-/* =========================
-MEMORIA DE CONVERSACIÓN
-========================= */
-
-let conversacion = [];
-
-let ultimoTema = "";
-
-function recordar(text){
-
-conversacion.push(text);
-
-if(conversacion.length > 10){
-
-conversacion.shift();
-
-}
-
-}
-/* =========================
-CHISTES
-========================= */
-
-const chistes = [
-
-"¿en que se diferencia un judio a una pizza      la pizza nogrita en el horno.",
-"¿que es una persona en silla de ruedas saliendo de un edificio en llamas?.....un hot wills",
-"¿cual es la diferencia entre un papá y el agne?............ que el agne te espera hasta los 12 años",
-"¿Que es peor que dos bebés en una caneca de basura?..............Un bebé en dos canecas de basura",
-"Cual es el corte de pelo mas caro?..............La quimioterapia",
-"En qué se parecen un niño de la calle y un aguacate?.......En que los dos maduran envueltos en periódico.",
-"Vi a un negro cargando un televisor en un furgón y pensé  ¿Será el mío? , pero no, el mío está limpiando en casa.",
-"¿Porque los gays no ven fantasmas? ..........Porque los fantasmas son para-normales.",
-"¿porque russia no le manda misles a africa?.......porque no encuentran al blanco",
-
-];
-
-function contarChiste(){
-
-let chiste = chistes[Math.floor(Math.random()*chistes.length)];
-
-speak(chiste);
-
-}
-/* =========================
-VOZ SINTETIZADA
-========================= */
-
-function speak(text){
-
-speaking = true;
-
-let msg = new SpeechSynthesisUtterance(text);
-
-msg.lang = "es-MX";
-
-speechSynthesis.speak(msg);
-
-}
-/* =========================
-RESPUESTA
-========================= */
-
+/* ========================= RESPOND - modo normal platicativo + investigador ========================= */
 function respond(text){
+    let limpio = limpiar(text);
+    let intencion = detectarIntencion(text);
 
-recordar(text);
+    // Cambios de modo
+    if(intencion==="modo_estudio"){modo="estudio";setEmotion("estudio");speak("Modo estudio ON. ¿Qué quieres aprender o repasar?");return;}
+    if(intencion==="modo_emocional"){modo="emocional";setEmotion("emocional");speak("Estoy aquí contigo. Puedes contarme todo.");return;}
+    if(intencion==="modo_normal"){modo="normal";setEmotion("normal");speak("¡Volvimos a platicar normal! ¿De qué quieres charlar ahora?");return;}
 
-let intencion = detectarIntencion(text);
+    // Modo racista secreto
+    if(intencion==="modo_racista"){
+        modoRacistaSecreto = true;
+        modo = "racista";
+        setEmotion("racista");
+        if(!perfil.nombre){
+            creandoPerfil = true;
+            faseCuestionario = 1;
+            speak("Protocolo racista activado. Para personalizar... ¿Cuál es tu nombre?");
+        }else{
+            speak(`Bienvenido de nuevo, ${perfil.nombre}. Modo racista ON.`);
+        }
+        return;
+    }
 
-switch(intencion){
+    // Respuestas según modo
+    if(modo==="estudio" || modo==="emocional"){
+        speak(`Estoy en modo ${modo}. ¿Seguimos con eso o cambiamos?`);
+        return;
+    }
 
-case "calculadora":
+    // Modo normal: platicativo + investigador
+    if(modo==="normal"){
+        if(intencion==="investigar"){
+            investigar(text);
+            return;
+        }
 
-abrirCalculadora();
+        if(intencion==="calculadora"){
+            abrirCalculadora();
+            return;
+        }
 
-break;
+        if(intencion==="cerrar_calc"){
+            cerrarCalculadora();
+            speak("Calculadora cerrada.");
+            return;
+        }
 
-case "cerrar_calc":
+        // Conversación natural
+        if(limpio.includes("hola")||limpio.includes("qué tal")||limpio.includes("cómo estás")){
+            speak("¡Holaaa! Aquí estoy con toda la buena vibra. ¿Cómo andas tú hoy, Jose Eduardo? ¿Algo rico que hayas hecho o alguna idea loca en la cabeza?");
+            return;
+        }
 
-cerrarCalculadora();
+        if(limpio.includes("gracias")||limpio.includes("te agradezco")){
+            speak("De nada, para eso estoy. Me encanta platicar contigo. ¿Seguimos charlando o quieres que investiguemos algo interesante?");
+            return;
+        }
 
-speak("Calculadora cerrada");
+        if(limpio.includes("aburrido")||limpio.includes("no sé qué hacer")){
+            speak("¿Aburrido? ¡Ni modo! Cuéntame qué te suele sacar una sonrisa o qué te intriga últimamente. Si quieres, puedo contarte algo curioso o buscar algo que te vuele la cabeza.");
+            return;
+        }
 
-break;
-
-case "precio":
-
-speak("El precio es de 120 pesos.");
-
-break;
-
-case "beneficios":
-
-speak("Es una pulsera aromática reutilizable.");
-
-break;
-
-case "modo_razista":
-
-modo="razista";
-
-setEmotion("razista");
-
-speak("Modo razista activado.");
-
-break;
-
-case "trece":
-
-speak("entre mas me la mamas mas me crece");
-
-break;
-
-case "chiste":
-
-if(modo==="razista"){
-
-contarChiste();
-
-}else{
-
-speak("Activa primero el modo humor.");
-
+        // Por defecto: muy platicativo
+        speak(`Mmm… interesante lo que dices. Me dejó pensando… ¿qué te hizo pensar en eso? O si prefieres, puedo investigar cualquier tema que te intrigue. ¿Qué tienes en mente ahorita? 😊`);
+        return;
+    }
 }
 
-break;
-
-case "modo_vendedor":
-
-modo="vendedor";
-
-setEmotion("ventas");
-
-speak("Modo vendedor activado.");
-
-break;
-
-case "modo_normal":
-
-modo="normal";
-
-setEmotion("normal");
-
-speak("Modo normal activado.");
-
-break;
-
-case "investigar":
-
-let limpio = limpiar(text);
-
-let tema = limpio
-.replace("investigar","")
-.replace("que es","")
-.replace("buscar","")
-.trim();
-
-if(tema===""){
-tema = ultimoTema;
-}
-
-ultimoTema = tema;
-
-investigarWikipedia(tema);
-
-break;
-
-default:
-
-speak("Sistema activo.");
-
-}
-
-}
-
-/* =========================
-INPUT
-========================= */
-
-input.addEventListener("keydown",e=>{
-
-if(e.key==="Enter"){
-
-respond(input.value);
-
-input.value="";
-
-}
-
-});
-
-/* =========================
-VOZ
-========================= */
+/* ========================= INPUTS Y VOZ ========================= */
+input.addEventListener("keydown",e=>{if(e.key==="Enter"){respond(input.value);input.value="";}});
 
 let escuchando = false;
+mic.onclick=()=>{if(escuchando){recognition.stop();escuchando=false;mic.innerText="🎤";}else{recognition.start();escuchando=true;mic.innerText="🛑";}};
 
-mic.onclick = () => {
-
-if(escuchando){
-recognition.stop();
-escuchando = false;
-mic.innerText="🎤";
-}else{
-recognition.start();
-escuchando = true;
-mic.innerText="🛑";
+if(recognition){
+    recognition.onresult=e=>{let t=e.results[e.results.length-1][0].transcript;input.value=t;respond(t);};
 }
 
-};
+/* ========================= CALCULADORA ========================= */
+let calc=document.getElementById("calc"),calcScreen=document.getElementById("calcScreen");
+function calcAdd(v){calcScreen.value+=v;}
+function calcResult(){try{let r=eval(calcScreen.value);calcScreen.value=r;speak("Resultado "+r);}catch{calcScreen.value="Error";}}
+function calcClear(){calcScreen.value="";}
+function abrirCalculadora(){calc.style.display="block";}
+function cerrarCalculadora(){calc.style.display="none";}
+document.addEventListener("click",e=>{if(e.target.id==="calc")cerrarCalculadora();});
 
-recognition.onresult=function(event){
-
-let texto = event.results[event.results.length-1][0].transcript;
-
-input.value = texto;
-
-respond(texto);
-
-};
-
-/* =========================
-CALCULADORA
-========================= */
-
-let calc = document.getElementById("calc");
-let calcScreen = document.getElementById("calcScreen");
-
-function calcAdd(v){
-calcScreen.value += v;
-}
-
-function calcResult(){
-
-try{
-
-let r = eval(calcScreen.value);
-
-calcScreen.value = r;
-
-speak("Resultado " + r);
-
-}catch{
-
-calcScreen.value="Error";
-
-}
-
-}
-
-function calcClear(){
-calcScreen.value="";
-}
-
-function abrirCalculadora(){
-
-calc.style.display="block";
-
-speak("Calculadora activada");
-
-}
-
-function cerrarCalculadora(){
-
-calc.style.display="none";
-
-}
-document.addEventListener("click",(e)=>{
-
-if(e.target.id==="calc"){
-cerrarCalculadora();
-}
-
-});
+// Inicio: saludo amigable en modo normal
+speak("¡Hola Jose Eduardo! Estoy listo para platicar de lo que sea. ¿Cómo estás hoy? ¿De qué quieres charlar?");
 </script>
-
 </body>
 </html>
 
