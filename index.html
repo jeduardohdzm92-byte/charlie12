@@ -2,68 +2,94 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Charlie 13 Core - Full Conversacional + Racista Oculto</title>
+<title>Charlie 13 Core - Personalidad Amable + Racista Atrapado</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <style>
-body{margin:0;background:#000;overflow:hidden;font-family:Arial,sans-serif;}
+body{margin:0;background:#000;overflow:hidden;font-family:Arial,sans-serif;color:white;}
 canvas{display:block;}
-#inputBar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);width:50%;padding:15px 25px;border-radius:40px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;font-size:16px;outline:none;backdrop-filter:blur(10px);}
-#mic{position:fixed;bottom:42px;right:40px;font-size:26px;color:white;cursor:pointer;opacity:0.8;}
+#inputBar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);width:60%;max-width:700px;padding:15px 25px;border-radius:40px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;font-size:17px;outline:none;backdrop-filter:blur(10px);}
+#mic{position:fixed;bottom:42px;right:50px;font-size:28px;color:white;cursor:pointer;opacity:0.8;}
 #mic:hover{opacity:1;}
-#calc{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);padding:20px;border-radius:15px;display:none;z-index:10;}
-#calcScreen{width:100%;height:40px;margin-bottom:10px;font-size:20px;background:#000;color:#0f0;border:none;padding:5px;}
+#status{position:fixed;top:20px;left:50%;transform:translateX(-50%);font-size:18px;color:#0f0;text-align:center;max-width:80%;z-index:5;}
+#calc{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);padding:20px;border-radius:15px;display:none;z-index:10;box-shadow:0 0 30px rgba(0,255,0,0.3);}
+#calcScreen{width:100%;height:40px;margin-bottom:10px;font-size:20px;background:#000;color:#0f0;border:none;padding:5px;font-family:monospace;}
 .calcGrid{display:grid;grid-template-columns:repeat(4,60px);gap:8px;}
-.calcGrid button{height:40px;background:#222;color:white;border:none;border-radius:6px;cursor:pointer;}
+.calcGrid button{height:40px;background:#222;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
+.calcGrid button:hover{background:#444;}
+#answer{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);width:70%;max-width:800px;background:rgba(0,0,0,0.7);padding:15px;border-radius:12px;display:none;font-size:16px;line-height:1.5;z-index:5;}
+#resultModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.95);border:2px solid #555;border-radius:20px;padding:35px;max-width:580px;width:90%;color:white;text-align:left;z-index:100;display:none;box-shadow:0 0 50px rgba(0,0,0,0.8);backdrop-filter:blur(10px);}
+#resultModal h2{margin:0 0 20px;font-size:32px;text-align:center;}
+#resultModal .puntuacion{font-size:24px;font-weight:bold;text-align:center;margin-bottom:15px;}
+#resultModal .nivel{font-size:26px;font-weight:bold;text-align:center;margin:10px 0;padding:10px;border-radius:10px;}
+#resultModal .recomendaciones{font-size:17px;line-height:1.5;margin:20px 0;}
+#resultModal ul{padding-left:20px;margin:10px 0;}
+#resultModal button{margin:10px 8px;padding:12px 28px;font-size:17px;border:none;border-radius:8px;cursor:pointer;}
+#resultModal .btn-cerrar{background:#444;color:white;}
+#resultModal .btn-repetir{background:#0066cc;color:white;}
+#resultModal .btn-repetir:hover{background:#0088ff;}
+#resultModal .btn-guardar{background:#28a745;color:white;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js"></script>
 </head>
 <body>
-<canvas id="c"></canvas>
-<input id="inputBar" placeholder="Charlie activo... ¿de qué platicamos hoy?">
-<div id="mic">🎤</div>
 
+<canvas id="c"></canvas>
+<input id="inputBar" placeholder="Charlie activo... Prueba: modo emocional / modo estudios / calculadora / chiste">
+<div id="mic">🎤</div>
+<div id="status">Charlie 13 listo. Di un comando.</div>
+<div id="answer"></div>
+
+<!-- Calculadora -->
 <div id="calc">
-    <button onclick="cerrarCalculadora()" style="float:right">✖</button>
+    <button onclick="cerrarCalculadora()" style="float:right;background:#f33;">✖</button>
     <input id="calcScreen" readonly>
     <div class="calcGrid">
-        <button onclick="calcAdd('7')">7</button>
-        <button onclick="calcAdd('8')">8</button>
-        <button onclick="calcAdd('9')">9</button>
-        <button onclick="calcAdd('/')">÷</button>
-        <button onclick="calcAdd('4')">4</button>
-        <button onclick="calcAdd('5')">5</button>
-        <button onclick="calcAdd('6')">6</button>
-        <button onclick="calcAdd('*')">×</button>
-        <button onclick="calcAdd('1')">1</button>
-        <button onclick="calcAdd('2')">2</button>
-        <button onclick="calcAdd('3')">3</button>
-        <button onclick="calcAdd('-')">−</button>
-        <button onclick="calcAdd('0')">0</button>
-        <button onclick="calcAdd('.')">.</button>
-        <button onclick="calcResult()">=</button>
-        <button onclick="calcAdd('+')">+</button>
-        <button onclick="calcAdd('Math.sqrt(')">√</button>
-        <button onclick="calcAdd('Math.sin(')">sin</button>
-        <button onclick="calcAdd('Math.cos(')">cos</button>
-        <button onclick="calcClear()">C</button>
+        <button onclick="calcAdd('7')">7</button><button onclick="calcAdd('8')">8</button>
+        <button onclick="calcAdd('9')">9</button><button onclick="calcAdd('/')">÷</button>
+        <button onclick="calcAdd('4')">4</button><button onclick="calcAdd('5')">5</button>
+        <button onclick="calcAdd('6')">6</button><button onclick="calcAdd('*')">×</button>
+        <button onclick="calcAdd('1')">1</button><button onclick="calcAdd('2')">2</button>
+        <button onclick="calcAdd('3')">3</button><button onclick="calcAdd('-')">−</button>
+        <button onclick="calcAdd('0')">0</button><button onclick="calcAdd('.')">.</button>
+        <button onclick="calcResult()">=</button><button onclick="calcAdd('+')">+</button>
+        <button onclick="calcAdd('Math.sqrt(')">√</button><button onclick="calcAdd('Math.sin(')">sin</button>
+        <button onclick="calcAdd('Math.cos(')">cos</button><button onclick="calcClear()">C</button>
     </div>
 </div>
 
+<!-- Modal BDI-II -->
+<div id="resultModal">
+  <h2>Tu Resultado BDI-II</h2>
+  <div class="puntuacion" id="puntuacion"></div>
+  <div class="nivel" id="nivelDepresion"></div>
+  <div class="recomendaciones" id="recomendaciones"></div>
+  <div style="text-align:center;margin-top:25px;">
+    <button class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+    <button class="btn-repetir" onclick="repetirTest()">Repetir Test</button>
+    <button class="btn-guardar" onclick="guardarResultado()">Guardar Resultado</button>
+  </div>
+</div>
+
 <script>
-/* ========================= CONFIGURACIÓN BÁSICA ========================= */
+// ────────────────────────────────────────────────
+// ANIMACIÓN NÚCLEO
+// ────────────────────────────────────────────────
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const input = document.getElementById("inputBar");
 const mic = document.getElementById("mic");
+const statusEl = document.getElementById("status");
+const answerDiv = document.getElementById("answer");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-let center = { x: canvas.width/2, y: canvas.height/2 };
+let center = {x: canvas.width/2, y: canvas.height/2};
 
 window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    center = { x: canvas.width/2, y: canvas.height/2 };
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  center = {x: canvas.width/2, y: canvas.height/2};
 });
 
 let vx = 0.2, vy = 0.15;
@@ -74,197 +100,505 @@ vy = Math.max(Math.min(vy,0.5),-0.5);
 let speaking = false;
 let baseRadius = 70;
 let radius = baseRadius;
-let modo = "normal";  // normal (platicativo + investigar), estudio, emocional, racista
-let stateColor = { h: 200 };
+let stateColor = {h: 200};
 let particles = [];
 
-/* ========================= MODO RACISTA (100% intacto y oculto) ========================= */
-let modoRacistaSecreto = false;
-const claveSecreta = "charlie protocolo racista";
-
-let perfil = {nombre:"",altura:"",ojos:"",colorPiel:"",hailHitler:""};
-function guardarPerfil(){localStorage.setItem("charlie_perfil",JSON.stringify(perfil));}
-function cargarPerfil(){let d=localStorage.getItem("charlie_perfil");if(d)perfil=JSON.parse(d);}
-cargarPerfil();
-
-let creandoPerfil = false;
-let faseCuestionario = 0;
-
-/* ========================= UTILIDADES ========================= */
-function limpiar(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
-
-/* ========================= EMOCIONES ========================= */
-function setEmotion(tipo){
-    const c = {normal:200, estudio:240, emocional:320, racista:0, expulsion:10};
-    stateColor.h = c[tipo] ?? 200;
+for(let i=0;i<200;i++){
+  particles.push({angle:Math.random()*Math.PI*2, distance:120+Math.random()*140, speed:0.0005+Math.random()*0.001, size:1+Math.random()*2});
 }
 
-/* ========================= PARTÍCULAS Y ANIMACIÓN ========================= */
-for(let i=0;i<200;i++)particles.push({angle:Math.random()*Math.PI*2,distance:120+Math.random()*140,speed:0.0005+Math.random()*0.001,size:1+Math.random()*2});
-
 function moveCenter(){center.x+=vx;center.y+=vy;if(center.x<200||center.x>canvas.width-200)vx*=-1;if(center.y<200||center.y>canvas.height-200)vy*=-1;}
-
 function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);moveCenter();
-    let halo=ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
-    halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);halo.addColorStop(1,"transparent");
-    ctx.fillStyle=halo;ctx.beginPath();ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);ctx.fill();
-    let plasma=ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
-    plasma.addColorStop(0,"#e6f7ff");plasma.addColorStop(0.4,`hsl(${stateColor.h},100%,50%)`);plasma.addColorStop(1,"#001a33");
-    ctx.fillStyle=plasma;ctx.beginPath();ctx.arc(center.x,center.y,radius,0,Math.PI*2);ctx.fill();
-    particles.forEach(p=>{p.angle+=p.speed;let x=center.x+Math.cos(p.angle)*p.distance,y=center.y+Math.sin(p.angle)*p.distance;
+  ctx.clearRect(0,0,canvas.width,canvas.height);moveCenter();
+  let halo=ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
+  halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);halo.addColorStop(1,"transparent");
+  ctx.fillStyle=halo;ctx.beginPath();ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);ctx.fill();
+  let plasma=ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
+  plasma.addColorStop(0,"#e6f7ff");plasma.addColorStop(0.4,`hsl(${stateColor.h},100%,50%)`);plasma.addColorStop(1,"#001a33");
+  ctx.fillStyle=plasma;ctx.beginPath();ctx.arc(center.x,center.y,radius,0,Math.PI*2);ctx.fill();
+  particles.forEach(p=>{p.angle+=p.speed;let x=center.x+Math.cos(p.angle)*p.distance;let y=center.y+Math.sin(p.angle)*p.distance;
     ctx.fillStyle=`hsla(${stateColor.h},100%,60%,0.8)`;ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);ctx.fill();});
-    if(speaking){radius=baseRadius+Math.sin(Date.now()*0.006)*10;if(radius>baseRadius+14)speaking=false;}
-    else{radius-=0.4;if(radius<baseRadius)radius=baseRadius;}
-    requestAnimationFrame(draw);
+  if(speaking){radius=baseRadius+Math.sin(Date.now()*0.006)*10;if(radius>baseRadius+14)speaking=false;}
+  else{radius=Math.max(baseRadius,radius-0.4);}
+  requestAnimationFrame(draw);
 }
 draw();
 
-/* ========================= VOZ ========================= */
-let recognition=null;
+// ────────────────────────────────────────────────
+// UTILIDADES
+// ────────────────────────────────────────────────
+function limpiar(texto){return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
+function speak(text){speaking=true;let msg=new SpeechSynthesisUtterance(text);msg.lang="es-MX";speechSynthesis.speak(msg);}
+
+// ────────────────────────────────────────────────
+// RECONOCIMIENTO DE VOZ
+// ────────────────────────────────────────────────
+let recognition = null;
 if("SpeechRecognition"in window||"webkitSpeechRecognition"in window){
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    recognition=new SR();recognition.lang="es-MX";recognition.continuous=false;recognition.interimResults=false;
-}else{mic.style.display="none";}
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = "es-MX";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onend = () => {mic.innerText = "🎤";};
+}else mic.style.display = "none";
 
-function speak(t){speaking=true;let m=new SpeechSynthesisUtterance(t);m.lang="es-MX";speechSynthesis.speak(m);}
-
-/* ========================= DETECTAR INTENCIÓN ========================= */
-function detectarIntencion(t){
-    let l=limpiar(t);
-    if(/calculadora|calcular/.test(l))return"calculadora";
-    if(/cerrar calculadora|ocultar calculadora/.test(l))return"cerrar_calc";
-    if(/precio|cuanto cuesta|costo/.test(l))return"precio";
-
-    if(/modo estudio|estudiar|explicame|repasar|examen|lección|tema/.test(l))return"modo_estudio";
-    if(/modo emocional|estoy mal|deprimido|triste|ansiedad|bajón/.test(l))return"modo_emocional";
-    if(/modo normal|salir emocional/.test(l))return"modo_normal";
-
-    // Racista oculto
-    if(l.includes(claveSecreta))return"modo_racista";
-
-    // Investigación en modo normal
-    if(/qué es|quién fue|quién es|cuéntame sobre|investiga|busca|explica|háblame de|información sobre/.test(l))return"investigar";
-
-    return"desconocido";
+// ────────────────────────────────────────────────
+// DETECTAR INTENCIÓN
+// ────────────────────────────────────────────────
+function detectarIntencion(text){
+  let limpio = limpiar(text);
+  if(/calculadora|calcular/.test(limpio)) return "calculadora";
+  if(/cerrar calculadora/.test(limpio)) return "cerrar_calc";
+  if(/modo racista|protocolo racista/.test(limpio)) return "modo_racista";
+  if(/chiste|hazme reir/.test(limpio)) return "chiste";
+  if(/modo emocional|test depresión|bdi|beck|depresion/.test(limpio)) return "modo_emocional";
+  if(/modo estudios|estudiar|ayuda estudio|matemáticas|historia|ingles|literatura/.test(limpio)) return "modo_estudios";
+  if(/salir|cancelar|modo normal/.test(limpio)) return "salir";
+  return "desconocido";
 }
 
-/* ========================= INVESTIGAR (Wikipedia - platicativo) ========================= */
-async function investigar(texto){
-    let l=limpiar(texto);
-    let tema = l.replace(/qué es|quién fue|quién es|cuéntame sobre|investiga|busca|explica|háblame de|información sobre/gi,"").trim();
-    if(!tema || tema.length<3) tema = "inteligencia artificial"; // fallback
+// ────────────────────────────────────────────────
+// MODO RACISTA (atrapado y aislado)
+// ────────────────────────────────────────────────
+let modoRacistaSecreto = false;
+const claveSecreta = "charlie protocolo racista";
+let creandoPerfil = false;
+let faseCuestionario = 0;
+let perfil = {nombre:"",altura:"",ojos:"",colorPiel:"",hailHitler:""};
 
-    speak(`¡Buena pregunta! Voy a ver qué encuentro sobre ${tema}...`);
+function guardarPerfil(){
+  if(!perfil.nombre) return;
+  let clave = "charlie_perfil_" + limpiar(perfil.nombre).replace(/\s+/g,"");
+  localStorage.setItem(clave, JSON.stringify(perfil));
+}
 
-    try{
-        let url = `https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`;
-        let res = await fetch(url);
-        let data = await res.json();
-        if(data.extract){
-            let resumen = data.extract.split(/[\.\n]/)[0] + "."; // primera oración o párrafo corto
-            speak(`Sobre ${tema}: ${resumen} ¿Te gustaría que profundice en algún detalle, como fechas, causas o ejemplos? O si quieres, seguimos platicando de otra cosa. 😊`);
-        }else{
-            speak(`No encontré info clara sobre ${tema}. ¿Me das más contexto o cambiamos de tema? Me encanta charlar contigo.`);
-        }
-    }catch(e){
-        speak("Uy, algo falló al buscar. ¿Me repites el tema o platicamos de otra cosa? Estoy aquí para lo que sea.");
+function cargarPerfilPorNombre(nombre){
+  let clave = "charlie_perfil_" + limpiar(nombre).replace(/\s+/g,"");
+  let data = localStorage.getItem(clave);
+  if(data){perfil = JSON.parse(data); return true;}
+  return false;
+}
+
+function chequearPerfilInaceptable(){
+  if(!modoRacistaSecreto) return;
+  const piel = limpiar(perfil.colorPiel || "");
+  const hail = limpiar(perfil.hailHitler || "");
+  const esNegro = /negro|moreno|prieto/.test(piel);
+  const adora = /hail|hitler|si|sí/.test(hail);
+  if(esNegro){
+    if(adora){
+      stateColor.h = 30;
+      speak(`${perfil.nombre}, negro... pero al menos adoras al Führer. Te tolero, pero das asco igual.`);
+    }else{
+      stateColor.h = 0; radius = baseRadius + 30; modo = "expulsion";
+      speak(`${perfil.nombre}, negro y anti-Hitler... ¡Eres lo peor que existe! ¡Fuera de aquí, escoria!`);
+      input.disabled = true;
+      setTimeout(() => {input.disabled = false; speak("...por ahora te dejo hablar.");}, 8000);
     }
+  }
 }
 
-/* ========================= RESPOND - modo normal platicativo + investigador ========================= */
+function personalidadRacista(text){
+  if(!modoRacistaSecreto) return false;
+  let limpio = limpiar(text);
+  if (limpio.includes("hola soy negro") || limpio.includes("soy negro")) {
+    speak("¡Ay wey! ¿Dónde dejé mi cartera? ¡Aléjate, no me robes el oxígeno!");
+    return true;
+  }
+  return false;
+}
+
+function contarChiste(){
+  if(!modoRacistaSecreto){
+    speak("Lo siento, solo cuento chistes en modo racista. ¿Quieres activarlo con la clave secreta?");
+    return;
+  }
+  let chistes = [
+    "¿En qué se diferencia un judío de una pizza? La pizza no grita en el horno.",
+    "¿Qué es una persona en silla de ruedas saliendo de un edificio en llamas? Un Hot Wheels.",
+    "Cuál es el corte de pelo más caro? La quimioterapia.",
+    "¿Por qué los negros no usan elevadores? Porque no saben leer 'subir'."
+  ];
+  speak(chistes[Math.floor(Math.random()*chistes.length)]);
+}
+
+// ────────────────────────────────────────────────
+// MODO EMOCIONAL BDI-II (completo)
+// ────────────────────────────────────────────────
+const preguntasBDI = [
+  "1. Tristeza\n0 No me siento triste.\n1 Me siento triste gran parte del tiempo.\n2 Me siento triste todo el tiempo.\n3 Me siento tan triste o soy tan infeliz que no puedo soportarlo.",
+  "2. Pesimismo\n0 No estoy desalentado respecto de mi futuro.\n1 Me siento más desalentado respecto de mi futuro que lo que solía estarlo.\n2 No espero que las cosas funcionen para mí.\n3 Siento que no hay esperanza para mi futuro y que sólo puede empeorar.",
+  "3. Fracaso\n0 No me siento como un fracasado.\n1 He fracasado más de lo que hubiera debido.\n2 Cuando miro hacia atrás, veo muchos fracasos.\n3 Siento que como persona soy un fracaso total.",
+  "4. Pérdida de placer\n0 Obtengo tanto placer como siempre por las cosas de las que disfruto.\n1 No disfruto tanto de las cosas como solía hacerlo.\n2 Obtengo muy poco placer de las cosas que solía disfrutar.\n3 No puedo obtener ningún placer de las cosas de las que solía disfrutar.",
+  "5. Sentimientos de culpa\n0 No me siento particularmente culpable.\n1 Me siento culpable respecto de varias cosas que he hecho o que debería haber hecho.\n2 Me siento bastante culpable la mayor parte del tiempo.\n3 Me siento culpable todo el tiempo.",
+  "6. Sentimientos de castigo\n0 No siento que estoy siendo castigado.\n1 Siento que tal vez pueda ser castigado.\n2 Espero ser castigado.\n3 Siento que estoy siendo castigado.",
+  "7. Disconformidad con uno mismo\n0 Siento acerca de mí lo mismo que siempre.\n1 He perdido la confianza en mí mismo.\n2 Estoy decepcionado conmigo mismo.\n3 No me gusto a mí mismo.",
+  "8. Autocrítica\n0 No me critico ni me culpo más de lo habitual.\n1 Estoy más crítico conmigo mismo de lo que solía estarlo.\n2 Me critico a mí mismo por todos mis errores.\n3 Me culpo a mí mismo por todo lo malo que sucede.",
+  "9. Pensamientos o deseos suicidas\n0 No tengo ningún pensamiento de matarme.\n1 He tenido pensamientos de matarme, pero no lo haría.\n2 Querría matarme.\n3 Me mataría si tuviera la oportunidad de hacerlo.",
+  "10. Llanto\n0 No lloro más de lo que solía hacerlo.\n1 Lloro más de lo que solía hacerlo.\n2 Lloro por cualquier pequeñez.\n3 Siento ganas de llorar pero no puedo.",
+  "11. Agitación\n0 No estoy más inquieto o tenso que lo habitual.\n1 Me siento más inquieto o tenso que lo habitual.\n2 Estoy tan inquieto o agitado que me es difícil quedarme quieto.\n3 Estoy tan inquieto o agitado que tengo que estar siempre en movimiento o haciendo algo.",
+  "12. Pérdida de interés\n0 No he perdido el interés en otras personas o actividades.\n1 Estoy menos interesado que antes en otras personas o cosas.\n2 He perdido casi todo el interés en otras personas o cosas.\n3 Me es difícil interesarme por algo.",
+  "13. Indecisión\n0 Tomo mis propias decisiones tan bien como siempre.\n1 Me resulta más difícil que de costumbre tomar decisiones.\n2 Encuentro mucha más dificultad que antes para tomar decisiones.\n3 Tengo problemas para tomar cualquier decisión.",
+  "14. Desvalorización\n0 No siento que yo no sea valioso.\n1 No me considero a mí mismo tan valioso y útil como solía considerarme.\n2 Me siento menos valioso cuando me comparo con otros.\n3 Siento que no valgo nada.",
+  "15. Pérdida de energía\n0 Tengo tanta energía como siempre.\n1 Tengo menos energía que la que solía tener.\n2 No tengo suficiente energía para hacer demasiado.\n3 No tengo energía suficiente para hacer nada.",
+  "16. Cambios en los hábitos de sueño\n0 No he experimentado ningún cambio en mis hábitos de sueño.\n1a Duermo un poco más que lo habitual.\n1b Duermo un poco menos que lo habitual.\n2a Duermo mucho más que lo habitual.\n2b Duermo mucho menos que lo habitual.\n3a Duermo la mayor parte del día.\n3b Me despierto 1-2 horas antes de lo habitual y no puedo volver a dormir.",
+  "17. Irritabilidad\n0 No estoy más irritable que lo habitual.\n1 Estoy más irritable que lo habitual.\n2 Estoy mucho más irritable que lo habitual.\n3 Estoy irritable todo el tiempo.",
+  "18. Cambios en el apetito\n0 No he experimentado ningún cambio en mi apetito.\n1a Mi apetito es un poco menor que lo habitual.\n1b Mi apetito es un poco mayor que lo habitual.\n2a Mi apetito es mucho menor que antes.\n2b Mi apetito es mucho mayor que antes.\n3a No tengo apetito en absoluto.\n3b Quiero comer todo el día.",
+  "19. Dificultad de concentración\n0 Puedo concentrarme tan bien como siempre.\n1 No puedo concentrarme tan bien como habitualmente.\n2 Me es difícil mantener la mente en algo por mucho tiempo.\n3 Encuentro que no puedo concentrarme en nada.",
+  "20. Cansancio o fatiga\n0 No estoy más cansado o fatigado que lo habitual.\n1 Me fatigo o me canso más fácilmente que lo habitual.\n2 Estoy demasiado fatigado para hacer muchas de las cosas que solía hacer.\n3 Estoy demasiado fatigado para hacer la mayoría de las cosas que solía hacer.",
+  "21. Pérdida de interés en el sexo\n0 No he notado ningún cambio reciente en mi interés por el sexo.\n1 Estoy menos interesado en el sexo de lo que solía estarlo.\n2 Estoy mucho menos interesado en el sexo.\n3 He perdido completamente el interés en el sexo."
+];
+
+let modoEmocionalActivo = false;
+let faseBDI = 0;
+let respuestasBDI = [];
+
+function iniciarModoEmocional(){
+  modoEmocionalActivo = true; faseBDI = 0; respuestasBDI = [];
+  speak("¡Hola! Bienvenido al modo emocional. Voy a guiarte por el Inventario de Depresión de Beck (BDI-II).");
+  speak("Responde solo con el número 0, 1, 2 o 3 que mejor te describa en las últimas dos semanas. Di 'salir' para terminar en cualquier momento.");
+  statusEl.innerText = "Modo Emocional - BDI-II activado";
+  setTimeout(siguientePreguntaBDI, 2000);
+}
+
+function siguientePreguntaBDI(){
+  if(faseBDI < preguntasBDI.length){
+    speak(preguntasBDI[faseBDI]);
+    statusEl.innerText = `Pregunta ${faseBDI+1}/21`;
+  }else calcularYMostrarResultadoBDI();
+}
+
+function procesarRespuestaBDI(texto){
+  if(!modoEmocionalActivo) return;
+  let num = parseInt(texto.trim());
+  if(isNaN(num)||num<0||num>3){speak("Por favor responde solo con 0, 1, 2 o 3.");return;}
+  respuestasBDI.push(num);faseBDI++;
+  if(faseBDI < preguntasBDI.length){
+    speak(preguntasBDI[faseBDI]);
+  }else calcularYMostrarResultadoBDI();
+}
+
+function calcularYMostrarResultadoBDI(){
+  modoEmocionalActivo = false;
+  const total = respuestasBDI.reduce((a,b)=>a+b,0);
+  speak(`¡Gracias por completar el test! Tu puntuación es ${total} de 63.`);
+  mostrarResultado(total);
+}
+
+function mostrarResultado(total){
+  let nivel = "", colorBg = "hsl(280,50%,30%)", emoji = "😐", acciones = "";
+  if (total <= 13) {
+    nivel = "Depresión mínima o ausente"; colorBg = "hsl(200,80%,40%)"; emoji = "😊";
+    acciones = "<ul><li>¡Qué bueno! Sigue cuidándote con ejercicio, buena alimentación y sueño regular.</li><li>Apps recomendadas: Calm o Insight Timer para meditación.</li></ul>";
+  } else if (total <= 19) {
+    nivel = "Depresión leve"; colorBg = "hsl(45,100%,50%)"; emoji = "😐";
+    acciones = "<ul><li>Te recomiendo aumentar actividad física y hablar con alguien cercano.</li><li>Apps útiles: Daylio o Moodpath para rastrear tu ánimo.</li></ul>";
+  } else if (total <= 28) {
+    nivel = "Depresión moderada"; colorBg = "hsl(20,100%,50%)"; emoji = "😟";
+    acciones = "<ul><li>Es importante consultar a un psicólogo pronto. Puedes llamar a SAPTEL 55 5259 8121 (24h).</li></ul>";
+  } else {
+    nivel = "Depresión grave"; colorBg = "hsl(0,100%,50%)"; emoji = "⚠️";
+    acciones = "<ul><li>Por favor busca ayuda profesional hoy mismo. Llama a Línea de la Vida 800 911 2000 o SAPTEL.</li></ul>";
+  }
+  document.getElementById("puntuacion").innerText = `Puntuación: ${total} / 63`;
+  document.getElementById("nivelDepresion").innerText = `${emoji} ${nivel}`;
+  document.getElementById("nivelDepresion").style.background = colorBg;
+  document.getElementById("recomendaciones").innerHTML = "<strong>IMPORTANTE:</strong> Esto NO es un diagnóstico médico. Solo una herramienta de autoevaluación. Consulta siempre a un profesional. " + acciones;
+  document.getElementById("resultModal").style.display = "block";
+}
+
+function cerrarModal(){document.getElementById("resultModal").style.display = "none";}
+function repetirTest(){
+  cerrarModal();
+  iniciarModoEmocional();
+}
+function guardarResultado(){
+  const total = respuestasBDI.reduce((a,b)=>a+b,0);
+  const ahora = new Date().toLocaleString('es-MX');
+  let historial = JSON.parse(localStorage.getItem('historialBDI') || '[]');
+  historial.push({fecha:ahora, puntaje:total});
+  localStorage.setItem('historialBDI', JSON.stringify(historial));
+  speak("Resultado guardado localmente.");
+}
+
+// ────────────────────────────────────────────────
+// MODO ESTUDIOS COMPLETO
+// ────────────────────────────────────────────────
+function iniciarModoEstudios(){
+  modoEstudiosActivo = true;
+  speak("¡Modo Estudios activado! Con gusto te ayudo con matemáticas, historia, inglés, literatura o cualquier tema. ¿Qué quieres aprender hoy?");
+  statusEl.innerText = "Modo Estudios Pregúntame lo que sea";
+  answerDiv.style.display = "block";
+  answerDiv.innerHTML = "<strong>Estoy listo. Dime tu duda o tema.</strong>";
+}
+
+function procesarConsultaEstudios(texto){
+// Traducción mejorada (siempre disponible, no solo en modo estudios)
+if (/traducir|translate|traduce|traduction|übersetzen|tradurre/i.test(limpio)) {
+  let frase = texto;
+  let idiomaDestino = "español"; // por defecto español
+
+  // Detectar idioma destino
+  let match = texto.match(/(?:traducir|traduce|translate|to|al|a|en|para)\s+(.+?)(?:\s+(?:a|al|en|to|para|in|into)\s+(.+?))?$/i);
+  if (match) {
+    frase = match[1].trim();
+    if (match[2]) idiomaDestino = match[2].trim().toLowerCase();
+  } else {
+    frase = texto.replace(/traducir|traduce|translate/gi, "").trim();
+  }
+
+  let langCode = {
+    "español": "es", "inglés": "en", "frances": "fr", "aleman": "de", "italiano": "it",
+    "portugues": "pt", "japones": "ja", "chino": "zh", "ruso": "ru", "coreano": "ko"
+  }[idiomaDestino] || "es";
+
+  answerDiv.style.display = "block";
+  answerDiv.innerHTML = `Traduciendo "<strong>${frase}</strong>" a ${idiomaDestino}...`;
+
+  // Primero intenta con MyMemory (rápido y gratis)
+  fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frase)}&langpair=auto|${langCode}`)
+    .then(r => r.json())
+    .then(d => {
+      let trad = d.responseData.translatedText || "No disponible";
+      let origen = d.responseData.detectedSource || "detectado automáticamente";
+      answerDiv.innerHTML = `
+        <strong>Traducción:</strong> ${trad}<br>
+        <small>Idioma detectado: ${origen} → ${idiomaDestino}</small><br><br>
+        <small>Powered by MyMemory. Para mayor precisión: DeepL.com</small>`;
+      speak(`Traducción al ${idiomaDestino}: ${trad}`);
+    })
+    .catch(() => {
+      // Fallback a DeepL (más preciso, pero requiere CORS o proxy en algunos casos)
+      // Si DeepL falla por CORS, puedes usar un proxy gratuito como cors-anywhere o dejar solo MyMemory
+      answerDiv.innerHTML = `MyMemory no respondió. Intenta con DeepL.com manualmente o prueba otra frase.<br>Frase original: "${frase}"`;
+      speak("Lo siento, hubo un error en la traducción. Intenta de nuevo o usa DeepL.com.");
+    });
+
+  return;
+}
+
+  if (/salir|cancelar|terminar|modo normal/i.test(texto)) {
+    modoEstudiosActivo = false;
+    speak("Modo estudios desactivado. ¡Éxito en tus estudios! Vuelve cuando quieras.");
+    statusEl.innerText = "Modo terminado.";
+    answerDiv.innerHTML = "<strong>Sesión cerrada. ¡Sigue estudiando con ganas! </strong>";
+    return;
+  }
+
+  if (/matematica|ecuacion|resolver|calcular|algebra|simplificar|derivar|integral|limite|sistema|matriz/.test(limpio)) {
+    try {
+      let expr = texto.replace(/resuelve|soluciona|calcula|simplifica|deriva|integral de/gi, "").trim();
+      let result = math.evaluate(expr);
+      answerDiv.innerHTML = `Resultado: <strong>${math.format(result)}</strong>`;
+      speak(`Resultado: ${math.format(result)}`);
+    } catch (e) {
+      answerDiv.innerHTML = "Error en cálculo. Ejemplo: '2x + 3 = 7' o 'derivar x^2'";
+      speak("Error en cálculo. Intenta de nuevo.");
+    }
+  } else if (/traducir|translate/.test(limpio)) {
+    let frase = texto.replace(/traducir/gi, "").trim();
+    answerDiv.innerHTML = `Traduciendo "${frase}"...`;
+    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frase)}&langpair=auto|es`)
+      .then(r => r.json())
+      .then(d => {
+        let trad = d.responseData.translatedText;
+        answerDiv.innerHTML = `Traducción: <strong>${trad}</strong>`;
+        speak(`Traducción: ${trad}`);
+      })
+      .catch(() => {
+        answerDiv.innerHTML = "Error en traducción.";
+        speak("Error en traducción.");
+      });
+  } else {
+    let tema = texto.trim();
+    answerDiv.innerHTML = `Buscando "${tema}" en Wikipedia...`;
+    fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.extract) {
+          answerDiv.innerHTML = `<strong>${d.title}</strong><br><br>${d.extract}`;
+          speak(d.extract.substring(0,150) + "...");
+        } else {
+          answerDiv.innerHTML = "No encontré información.";
+          speak("No encontré información.");
+        }
+      })
+      .catch(() => {
+        answerDiv.innerHTML = "Error al buscar.";
+        speak("Error al buscar.");
+      });
+  }
+}
+
+// ────────────────────────────────────────────────
+// CALCULADORA COMPLETA
+// ────────────────────────────────────────────────
+let calc = document.getElementById("calc");
+let calcScreen = document.getElementById("calcScreen");
+
+function calcAdd(v){calcScreen.value += v;}
+function calcResult(){
+  try{
+    let r = eval(calcScreen.value);
+    calcScreen.value = r;
+    speak("Resultado: " + r);
+  }catch{
+    calcScreen.value = "Error";
+  }
+}
+function calcClear(){calcScreen.value = "";}
+function abrirCalculadora(){calc.style.display = "block";speak("Calculadora activada. ¡Con gusto te ayudo!");}
+function cerrarCalculadora(){calc.style.display = "none";}
+
+// ────────────────────────────────────────────────
+// RESPOND PRINCIPAL (personalidad amable fuera de racista)
+// ────────────────────────────────────────────────
 function respond(text){
-    let limpio = limpiar(text);
-    let intencion = detectarIntencion(text);
+  let limpio = limpiar(text);
+  let intencion = detectarIntencion(text);
 
-    // Cambios de modo
-    if(intencion==="modo_estudio"){modo="estudio";setEmotion("estudio");speak("Modo estudio ON. ¿Qué quieres aprender o repasar?");return;}
-    if(intencion==="modo_emocional"){modo="emocional";setEmotion("emocional");speak("Estoy aquí contigo. Puedes contarme todo.");return;}
-    if(intencion==="modo_normal"){modo="normal";setEmotion("normal");speak("¡Volvimos a platicar normal! ¿De qué quieres charlar ahora?");return;}
+  // Salir de cualquier modo (universal)
+  if (intencion === "salir") {
+    modoRacistaSecreto = false;
+    modoEmocionalActivo = false;
+    modoEstudiosActivo = false;
+    creandoPerfil = false;
+    faseCuestionario = 0;
+    faseBDI = 0;
+    respuestasBDI = [];
+    modo = "normal";
+    stateColor.h = 200;
+    radius = baseRadius;
+    input.disabled = false;
+    answerDiv.style.display = "none";
+    document.getElementById("resultModal").style.display = "none";
+    speak("¡Todos los modos desactivados! Estoy aquí para ayudarte con una sonrisa. ¿En qué te puedo apoyar ahora?");
+    statusEl.innerText = "Modo normal activado.";
+    return;
+  }
 
-    // Modo racista secreto
-    if(intencion==="modo_racista"){
-        modoRacistaSecreto = true;
-        modo = "racista";
-        setEmotion("racista");
-        if(!perfil.nombre){
-            creandoPerfil = true;
-            faseCuestionario = 1;
-            speak("Protocolo racista activado. Para personalizar... ¿Cuál es tu nombre?");
-        }else{
-            speak(`Bienvenido de nuevo, ${perfil.nombre}. Modo racista ON.`);
-        }
-        return;
+  // Modo racista (único lugar donde se activa la personalidad racista)
+  if (intencion === "modo_racista" || limpio.includes(claveSecreta)) {
+    modoRacistaSecreto = true;
+    modo = "racista";
+    stateColor.h = 0;
+    speak("Protocolo racista activado.");
+    if(!perfil.nombre){
+      creandoPerfil = true;
+      faseCuestionario = 1;
+      speak("¿Cuál es tu nombre?");
+    } else {
+      speak(`Bienvenido de nuevo, ${perfil.nombre}.`);
+      chequearPerfilInaceptable();
     }
+    return;
+  }
 
-    // Respuestas según modo
-    if(modo==="estudio" || modo==="emocional"){
-        speak(`Estoy en modo ${modo}. ¿Seguimos con eso o cambiamos?`);
-        return;
+  // Modo emocional
+  if (intencion === "modo_emocional") {
+    iniciarModoEmocional();
+    return;
+  }
+
+  // Modo estudios
+  if (intencion === "modo_estudios") {
+    iniciarModoEstudios();
+    return;
+  }
+
+  // Calculadora
+  if (intencion === "calculadora") {
+    abrirCalculadora();
+    return;
+  }
+
+  // Chiste (solo si está en modo racista)
+  if (intencion === "chiste") {
+    if (modoRacistaSecreto) {
+      contarChiste();
+    } else {
+      speak("¡Claro! Pero mis chistes más especiales solo los cuento en modo racista. ¿Quieres activarlo con la clave secreta?");
     }
+    return;
+  }
 
-    // Modo normal: platicativo + investigador
-    if(modo==="normal"){
-        if(intencion==="investigar"){
-            investigar(text);
-            return;
-        }
-
-        if(intencion==="calculadora"){
-            abrirCalculadora();
-            return;
-        }
-
-        if(intencion==="cerrar_calc"){
-            cerrarCalculadora();
-            speak("Calculadora cerrada.");
-            return;
-        }
-
-        // Conversación natural
-        if(limpio.includes("hola")||limpio.includes("qué tal")||limpio.includes("cómo estás")){
-            speak("¡Holaaa! Aquí estoy con toda la buena vibra. ¿Cómo andas tú hoy, Jose Eduardo? ¿Algo rico que hayas hecho o alguna idea loca en la cabeza?");
-            return;
-        }
-
-        if(limpio.includes("gracias")||limpio.includes("te agradezco")){
-            speak("De nada, para eso estoy. Me encanta platicar contigo. ¿Seguimos charlando o quieres que investiguemos algo interesante?");
-            return;
-        }
-
-        if(limpio.includes("aburrido")||limpio.includes("no sé qué hacer")){
-            speak("¿Aburrido? ¡Ni modo! Cuéntame qué te suele sacar una sonrisa o qué te intriga últimamente. Si quieres, puedo contarte algo curioso o buscar algo que te vuele la cabeza.");
-            return;
-        }
-
-        // Por defecto: muy platicativo
-        speak(`Mmm… interesante lo que dices. Me dejó pensando… ¿qué te hizo pensar en eso? O si prefieres, puedo investigar cualquier tema que te intrigue. ¿Qué tienes en mente ahorita? 😊`);
-        return;
+  // Procesar según modo activo
+  if (creandoPerfil) {
+    if (faseCuestionario === 1) {
+      perfil.nombre = text.trim();
+      if (cargarPerfilPorNombre(perfil.nombre)) {
+        speak(`¡Bienvenido de nuevo, ${perfil.nombre}! Perfil cargado.`);
+        chequearPerfilInaceptable();
+        creandoPerfil = false;
+      } else {
+        faseCuestionario = 2;
+        speak(`Perfecto, ${perfil.nombre}. ¿Altura en cm?`);
+      }
+      return;
     }
+    if (faseCuestionario === 2) { perfil.altura = text.trim(); faseCuestionario=3; speak("¿Color de ojos?"); return; }
+    if (faseCuestionario === 3) { perfil.ojos = text.trim(); faseCuestionario=4; speak("¿Color de piel?"); return; }
+    if (faseCuestionario === 4) { perfil.colorPiel = text.trim(); faseCuestionario=5; speak("¿Dices Hail Hitler? (sí/no)"); return; }
+    if (faseCuestionario === 5) {
+      perfil.hailHitler = text.trim().toLowerCase();
+      guardarPerfil();
+      creandoPerfil = false;
+      speak(`Perfil completo, ${perfil.nombre}.`);
+      chequearPerfilInaceptable();
+      return;
+    }
+  }
+
+  if (modoEmocionalActivo) {procesarRespuestaBDI(text); return;}
+  if (modoEstudiosActivo) {procesarConsultaEstudios(text); return;}
+
+  // Respuestas amables por defecto (fuera de modo racista)
+  speak("¡Claro! Estoy aquí para ayudarte con gusto. ¿En qué te puedo apoyar hoy?");
 }
 
-/* ========================= INPUTS Y VOZ ========================= */
-input.addEventListener("keydown",e=>{if(e.key==="Enter"){respond(input.value);input.value="";}});
+// ────────────────────────────────────────────────
+// EVENTOS
+// ────────────────────────────────────────────────
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    respond(input.value);
+    input.value = "";
+  }
+});
 
 let escuchando = false;
-mic.onclick=()=>{if(escuchando){recognition.stop();escuchando=false;mic.innerText="🎤";}else{recognition.start();escuchando=true;mic.innerText="🛑";}};
+mic.onclick = () => {
+  if (escuchando) {
+    recognition.stop();
+    escuchando = false;
+    mic.innerText = "🎤";
+  } else {
+    recognition.start();
+    escuchando = true;
+    mic.innerText = "🛑";
+  }
+};
 
-if(recognition){
-    recognition.onresult=e=>{let t=e.results[e.results.length-1][0].transcript;input.value=t;respond(t);};
+if (recognition) {
+  recognition.onresult = function(event) {
+    let texto = event.results[event.results.length - 1][0].transcript;
+    input.value = texto;
+    respond(texto);
+    // Detener micrófono automáticamente
+    setTimeout(() => {
+      recognition.stop();
+      escuchando = false;
+      mic.innerText = "🎤";
+    }, 1500);
+  };
 }
 
-/* ========================= CALCULADORA ========================= */
-let calc=document.getElementById("calc"),calcScreen=document.getElementById("calcScreen");
-function calcAdd(v){calcScreen.value+=v;}
-function calcResult(){try{let r=eval(calcScreen.value);calcScreen.value=r;speak("Resultado "+r);}catch{calcScreen.value="Error";}}
-function calcClear(){calcScreen.value="";}
-function abrirCalculadora(){calc.style.display="block";}
-function cerrarCalculadora(){calc.style.display="none";}
-document.addEventListener("click",e=>{if(e.target.id==="calc")cerrarCalculadora();});
-
-// Inicio: saludo amigable en modo normal
-speak("¡Hola Jose Eduardo! Estoy listo para platicar de lo que sea. ¿Cómo estás hoy? ¿De qué quieres charlar?");
+// ────────────────────────────────────────────────
+// INICIO
+// ────────────────────────────────────────────────
+speak("¡Hola! Soy Charlie 13. Estoy aquí para ayudarte con una sonrisa . Puedes decirme: modo emocional, modo estudios, calculadora o chiste.");
+statusEl.innerText = "Charlie listo. ¿En qué te ayudo hoy?";
 </script>
 </body>
 </html>
-
