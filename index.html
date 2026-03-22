@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -57,14 +57,45 @@
 </div>
 
 <!-- Panel Baymax -->
-<div id="baymaxPanel">
-  <div class="baymax-content">
-    <div id="baymaxTitle">ESCANEO EMOCIONAL</div>
-    <div id="baymaxContent" style="font-size:22px;margin:30px 0;min-height:100px;"></div>
-    <div id="baymaxScale" style="font-size:36px;color:#ffcc00;margin:20px 0;"></div>
-    <button onclick="document.getElementById('baymaxPanel').style.display='none'" style="padding:15px 40px;background:#00aaff;color:white;border:none;border-radius:12px;cursor:pointer;">Cerrar</button>
+<!-- Panel Baymax REAL (estilo Big Hero 6) -->
+<div id="baymaxPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,30,0.95);z-index:150;backdrop-filter:blur(15px);font-family:'Courier New',monospace;color:#00ffff;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:900px;height:80%;border:2px solid #00ffff;border-radius:20px;background:rgba(0,20,60,0.4);box-shadow:0 0 80px #00aaff inset,0 0 120px #00aaff;overflow:hidden;">
+    <!-- Título con glow -->
+    <div id="baymaxTitle" style="font-size:50px;text-align:center;margin:20px 0;letter-spacing:6px;animation:glow 1.8s infinite alternate;text-shadow:0 0 20px #00ffff;">SCANNING EMOTIONAL STATE</div>
+    
+    <!-- Silueta humana (como Baymax) -->
+    <div style="position:absolute;top:50%;left:20%;transform:translateY(-50%);width:200px;height:400px;">
+      <svg width="200" height="400" viewBox="0 0 200 400">
+        <path d="M100 0 Q150 50 150 150 Q150 250 100 300 Q50 250 50 150 Q50 50 100 0 Z M100 300 L100 400" fill="none" stroke="#00ffff" stroke-width="4" opacity="0.8">
+          <animate attributeName="stroke-dasharray" from="0,1000" to="1000,0" dur="3s" repeatCount="indefinite"/>
+        </path>
+      </svg>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div id="baymaxContent" style="position:absolute;top:25%;left:35%;width:60%;font-size:22px;line-height:1.6;text-align:left;"></div>
+    
+    <!-- Escala con barra -->
+    <div style="position:absolute;bottom:20%;left:35%;width:60%;text-align:center;">
+      <div id="baymaxScale" style="font-size:36px;color:#ffcc00;margin-bottom:10px;"></div>
+      <div style="width:100%;height:20px;background:#001133;border:1px solid #00ffff;border-radius:10px;overflow:hidden;">
+        <div id="baymaxProgress" style="width:0%;height:100%;background:linear-gradient(to right,#00ffff,#00aaff);transition:width 1.5s ease;"></div>
+      </div>
+    </div>
+    
+    <!-- Texto inferior -->
+    <div style="position:absolute;bottom:5%;left:0;right:0;text-align:center;font-size:18px;opacity:0.7;">BAYMAX EMOTIONAL COMPANION 💙 • ALWAYS HERE TO HELP</div>
+    
+    <button onclick="cerrarBaymaxPanel()" style="position:absolute;bottom:10px;right:20px;padding:12px 30px;background:#00aaff;color:white;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 20px #00aaff;">CERRAR ESCANEO</button>
   </div>
 </div>
+
+<style>
+  @keyframes glow {
+    from { text-shadow: 0 0 10px #00ffff; }
+    to   { text-shadow: 0 0 40px #00ffff, 0 0 60px #00aaff; }
+  }
+</style>
 
 <script>
 // ANIMACIÓN NÚCLEO
