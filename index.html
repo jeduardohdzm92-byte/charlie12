@@ -2,90 +2,77 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Charlie 13 Core - Completo con Traducción Mejorada</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
+<title>Charlie - Tu Compañero Personal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;background:#000;overflow:hidden;font-family:Arial,sans-serif;color:white;}
-canvas{display:block;}
-#inputBar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);width:60%;max-width:700px;padding:15px 25px;border-radius:40px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:white;font-size:17px;outline:none;backdrop-filter:blur(10px);}
-#mic{position:fixed;bottom:42px;right:50px;font-size:28px;color:white;cursor:pointer;opacity:0.8;}
-#mic:hover{opacity:1;}
-#status{position:fixed;top:20px;left:50%;transform:translateX(-50%);font-size:18px;color:#0f0;text-align:center;max-width:80%;z-index:5;}
-#calc{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);padding:20px;border-radius:15px;display:none;z-index:10;box-shadow:0 0 30px rgba(0,255,0,0.3);}
-#calcScreen{width:100%;height:40px;margin-bottom:10px;font-size:20px;background:#000;color:#0f0;border:none;padding:5px;font-family:monospace;}
-.calcGrid{display:grid;grid-template-columns:repeat(4,60px);gap:8px;}
-.calcGrid button{height:40px;background:#222;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:bold;}
-.calcGrid button:hover{background:#444;}
-#answer{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);width:70%;max-width:800px;background:rgba(0,0,0,0.7);padding:15px;border-radius:12px;display:none;font-size:16px;line-height:1.5;z-index:5;}
-#resultModal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.95);border:2px solid #555;border-radius:20px;padding:35px;max-width:580px;width:90%;color:white;text-align:left;z-index:100;display:none;box-shadow:0 0 50px rgba(0,0,0,0.8);backdrop-filter:blur(10px);}
-#resultModal h2{margin:0 0 20px;font-size:32px;text-align:center;}
-#resultModal .puntuacion{font-size:24px;font-weight:bold;text-align:center;margin-bottom:15px;}
-#resultModal .nivel{font-size:26px;font-weight:bold;text-align:center;margin:10px 0;padding:10px;border-radius:10px;}
-#resultModal .recomendaciones{font-size:17px;line-height:1.5;margin:20px 0;}
-#resultModal ul{padding-left:20px;margin:10px 0;}
-#resultModal button{margin:10px 8px;padding:12px 28px;font-size:17px;border:none;border-radius:8px;cursor:pointer;}
-#resultModal .btn-cerrar{background:#444;color:white;}
-#resultModal .btn-repetir{background:#0066cc;color:white;}
-#resultModal .btn-repetir:hover{background:#0088ff;}
-#resultModal .btn-guardar{background:#28a745;color:white;}
+  body { margin:0; background:#000; overflow:hidden; font-family:Arial,sans-serif; color:white; }
+  canvas { display:block; }
+  #inputBar { position:fixed; bottom:40px; left:50%; transform:translateX(-50%); width:70%; max-width:800px; padding:15px 25px; border-radius:40px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:white; font-size:18px; outline:none; backdrop-filter:blur(10px); box-shadow:0 4px 30px rgba(0,0,0,0.5); z-index:10; }
+  #mic { position:fixed; bottom:45px; right:15%; font-size:32px; cursor:pointer; opacity:0.7; transition:0.2s; z-index:10; }
+  #mic:hover { opacity:1; transform:scale(1.1); }
+  #status { position:fixed; top:20px; left:50%; transform:translateX(-50%); font-size:20px; color:#0f0; text-shadow:0 0 10px #0f0; z-index:10; }
+  #answer { position:fixed; bottom:110px; left:50%; transform:translateX(-50%); width:70%; max-width:900px; background:rgba(0,0,0,0.6); padding:20px; border-radius:15px; display:none; font-size:17px; line-height:1.5; z-index:5; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1); }
+  #calc, #resultModal, #baymaxPanel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; backdrop-filter:blur(10px); justify-content:center; align-items:center; }
+  .modal-content, .baymax-content { background:rgba(20,20,50,0.95); border:2px solid #00aaff; border-radius:20px; padding:40px; max-width:700px; width:90%; text-align:center; box-shadow:0 0 60px #00aaff; }
+  .modal-content h2 { color:#00aaff; margin-bottom:20px; }
+  #baymaxTitle { font-size:48px; color:#00ffff; margin-bottom:20px; animation:glow 2s infinite alternate; }
+  @keyframes glow { from { text-shadow:0 0 10px #00ffff; } to { text-shadow:0 0 40px #00ffff; } }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js"></script>
 </head>
 <body>
 
 <canvas id="c"></canvas>
-<input id="inputBar" placeholder="Charlie activo... Prueba: traduce 'hello' a español / modo emocional / modo estudios / charlie protocolo racista">
+<input id="inputBar" placeholder="Charlie listo... escribe o usa el micrófono">
 <div id="mic">🎤</div>
-<div id="status">Charlie listo. Di un comando.</div>
+<div id="status">Charlie listo</div>
 <div id="answer"></div>
 
 <!-- Calculadora -->
 <div id="calc">
-    <button onclick="cerrarCalculadora()" style="float:right;background:#f33;">✖</button>
-    <input id="calcScreen" readonly>
-    <div class="calcGrid">
-        <button onclick="calcAdd('7')">7</button><button onclick="calcAdd('8')">8</button>
-        <button onclick="calcAdd('9')">9</button><button onclick="calcAdd('/')">÷</button>
-        <button onclick="calcAdd('4')">4</button><button onclick="calcAdd('5')">5</button>
-        <button onclick="calcAdd('6')">6</button><button onclick="calcAdd('*')">×</button>
-        <button onclick="calcAdd('1')">1</button><button onclick="calcAdd('2')">2</button>
-        <button onclick="calcAdd('3')">3</button><button onclick="calcAdd('-')">−</button>
-        <button onclick="calcAdd('0')">0</button><button onclick="calcAdd('.')">.</button>
-        <button onclick="calcResult()">=</button><button onclick="calcAdd('+')">+</button>
-        <button onclick="calcAdd('Math.sqrt(')">√</button><button onclick="calcAdd('Math.sin(')">sin</button>
-        <button onclick="calcAdd('Math.cos(')">cos</button><button onclick="calcClear()">C</button>
-    </div>
+  <button onclick="cerrarCalculadora()" style="float:right;background:#f33;color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;">X</button>
+  <input id="calcScreen" readonly>
+  <div class="calcGrid">
+    <button onclick="calcAdd('7')">7</button><button onclick="calcAdd('8')">8</button>
+    <button onclick="calcAdd('9')">9</button><button onclick="calcAdd('/')">/</button>
+    <button onclick="calcAdd('4')">4</button><button onclick="calcAdd('5')">5</button>
+    <button onclick="calcAdd('6')">6</button><button onclick="calcAdd('*')">×</button>
+    <button onclick="calcAdd('1')">1</button><button onclick="calcAdd('2')">2</button>
+    <button onclick="calcAdd('3')">3</button><button onclick="calcAdd('-')">-</button>
+    <button onclick="calcAdd('0')">0</button><button onclick="calcAdd('.')">.</button>
+    <button onclick="calcResult()">=</button><button onclick="calcAdd('+')">+</button>
+    <button onclick="calcAdd('Math.sqrt(')">√</button><button onclick="calcClear()">C</button>
+  </div>
 </div>
 
-<!-- Modal BDI-II -->
+<!-- Modal BDI -->
 <div id="resultModal">
-  <h2>Tu Resultado BDI-II</h2>
-  <div class="puntuacion" id="puntuacion"></div>
-  <div class="nivel" id="nivelDepresion"></div>
-  <div class="recomendaciones" id="recomendaciones"></div>
-  <div style="text-align:center;margin-top:25px;">
-    <button class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
-    <button class="btn-repetir" onclick="repetirTest()">Repetir Test</button>
-    <button class="btn-guardar" onclick="guardarResultado()">Guardar Resultado</button>
+  <div class="modal-content">
+    <h2>Resultado BDI-II</h2>
+    <div id="puntuacion" style="font-size:28px;color:#0f0;"></div>
+    <div id="nivelDepresion" style="font-size:24px;margin:20px 0;padding:15px;border-radius:10px;"></div>
+    <div id="recomendaciones" style="text-align:left;"></div>
+    <button onclick="document.getElementById('resultModal').style.display='none'" style="margin-top:20px;padding:12px 30px;background:#444;color:white;border:none;border-radius:10px;cursor:pointer;">Cerrar</button>
+  </div>
+</div>
+
+<!-- Panel Baymax -->
+<div id="baymaxPanel">
+  <div class="baymax-content">
+    <div id="baymaxTitle">ESCANEO EMOCIONAL</div>
+    <div id="baymaxContent" style="font-size:22px;margin:30px 0;min-height:100px;"></div>
+    <div id="baymaxScale" style="font-size:36px;color:#ffcc00;margin:20px 0;"></div>
+    <button onclick="document.getElementById('baymaxPanel').style.display='none'" style="padding:15px 40px;background:#00aaff;color:white;border:none;border-radius:12px;cursor:pointer;">Cerrar</button>
   </div>
 </div>
 
 <script>
-// ────────────────────────────────────────────────
 // ANIMACIÓN NÚCLEO
-// ────────────────────────────────────────────────
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-const input = document.getElementById("inputBar");
-const mic = document.getElementById("mic");
-const statusEl = document.getElementById("status");
-const answerDiv = document.getElementById("answer");
-
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 let center = {x: canvas.width/2, y: canvas.height/2};
-
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -93,148 +80,58 @@ window.addEventListener("resize", () => {
 });
 
 let vx = 0.2, vy = 0.15;
-vx += (Math.random()-0.5)*0.02; vy += (Math.random()-0.5)*0.02;
-vx = Math.max(Math.min(vx,0.5),-0.5);
-vy = Math.max(Math.min(vy,0.5),-0.5);
-
 let speaking = false;
 let baseRadius = 70;
 let radius = baseRadius;
 let stateColor = {h: 200};
-let particles = [];
+let modoBaymax = false;
 
-for(let i=0;i<200;i++){
-  particles.push({angle:Math.random()*Math.PI*2, distance:120+Math.random()*140, speed:0.0005+Math.random()*0.001, size:1+Math.random()*2});
-}
+let particles = [];
+for(let i = 0; i < 200; i++) particles.push({angle:Math.random()*Math.PI*2, distance:120+Math.random()*140, speed:0.0005+Math.random()*0.001, size:1+Math.random()*2});
 
 function moveCenter(){center.x+=vx;center.y+=vy;if(center.x<200||center.x>canvas.width-200)vx*=-1;if(center.y<200||center.y>canvas.height-200)vy*=-1;}
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);moveCenter();
-  let halo=ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
+  let halo = ctx.createRadialGradient(center.x,center.y,radius,center.x,center.y,radius+200);
   halo.addColorStop(0,`hsla(${stateColor.h},100%,60%,0.6)`);halo.addColorStop(1,"transparent");
   ctx.fillStyle=halo;ctx.beginPath();ctx.arc(center.x,center.y,radius+200,0,Math.PI*2);ctx.fill();
-  let plasma=ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
+  let plasma = ctx.createRadialGradient(center.x,center.y,0,center.x,center.y,radius);
   plasma.addColorStop(0,"#e6f7ff");plasma.addColorStop(0.4,`hsl(${stateColor.h},100%,50%)`);plasma.addColorStop(1,"#001a33");
   ctx.fillStyle=plasma;ctx.beginPath();ctx.arc(center.x,center.y,radius,0,Math.PI*2);ctx.fill();
-  particles.forEach(p=>{p.angle+=p.speed;let x=center.x+Math.cos(p.angle)*p.distance;let y=center.y+Math.sin(p.angle)*p.distance;
-    ctx.fillStyle=`hsla(${stateColor.h},100%,60%,0.8)`;ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);ctx.fill();});
-  if(speaking){radius=baseRadius+Math.sin(Date.now()*0.006)*10;if(radius>baseRadius+14)speaking=false;}
-  else{radius=Math.max(baseRadius,radius-0.4);}
+  particles.forEach(p => {
+    p.angle += p.speed;
+    let x = center.x + Math.cos(p.angle)*p.distance;
+    let y = center.y + Math.sin(p.angle)*p.distance;
+    ctx.fillStyle = `hsla(${stateColor.h},100%,60%,0.8)`;
+    ctx.beginPath();ctx.arc(x,y,p.size,0,Math.PI*2);ctx.fill();
+  });
+  if(speaking){radius = baseRadius + Math.sin(Date.now()*0.006)*10; if(radius > baseRadius+14) speaking = false;}
+  else {radius = Math.max(baseRadius, radius - 0.4);}
+  if(modoBaymax) { stateColor.h = 220; radius = baseRadius + Math.sin(Date.now()*0.004)*8; }
   requestAnimationFrame(draw);
 }
 draw();
 
-// ────────────────────────────────────────────────
 // VARIABLES GLOBALES
-// ────────────────────────────────────────────────
-let modoRacistaSecreto = false;
-const claveSecreta = "charlie protocolo racista";
-let creandoPerfil = false;
-let faseCuestionario = 0;
-let perfil = {nombre:"",altura:"",ojos:"",colorPiel:"",hailHitler:""};
-
 let modoEmocionalActivo = false;
+let modoEstudiosActivo = false;
 let faseBDI = 0;
 let respuestasBDI = [];
 
-let modoEstudiosActivo = false;
-
-// ────────────────────────────────────────────────
 // UTILIDADES
-// ────────────────────────────────────────────────
-function limpiar(texto){return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();}
-function speak(text){speaking=true;let msg=new SpeechSynthesisUtterance(text);msg.lang="es-MX";speechSynthesis.speak(msg);}
+function limpiar(texto) { return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
+function speak(text) { speaking = true; let msg = new SpeechSynthesisUtterance(text); msg.lang = "es-MX"; speechSynthesis.speak(msg); }
 
-// ────────────────────────────────────────────────
-// RECONOCIMIENTO DE VOZ
-// ────────────────────────────────────────────────
-let recognition = null;
-if("SpeechRecognition"in window||"webkitSpeechRecognition"in window){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = "es-MX";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.onend = () => {mic.innerText = "🎤";};
-}else mic.style.display = "none";
-
-// ────────────────────────────────────────────────
-// DETECTAR INTENCIÓN
-// ────────────────────────────────────────────────
-function detectarIntencion(text){
-  let limpio = limpiar(text);
-  if(/calculadora|calcular/.test(limpio)) return "calculadora";
-  if(/cerrar calculadora/.test(limpio)) return "cerrar_calc";
-  if(/modo racista|protocolo racista/.test(limpio)) return "modo_racista";
-  if(/chiste|hazme reir/.test(limpio)) return "chiste";
-  if(/modo emocional|test depresión|bdi|beck|depresion/.test(limpio)) return "modo_emocional";
-  if(/modo estudios|estudiar|ayuda estudio|matemáticas|historia|ingles|literatura/.test(limpio)) return "modo_estudios";
-  if(/salir|cancelar|modo normal/.test(limpio)) return "salir";
-  return "desconocido";
+// PANEL BAYMAX
+function mostrarBaymaxPanel(titulo, contenido, escala = '') {
+  document.getElementById("baymaxTitle").innerText = titulo;
+  document.getElementById("baymaxContent").innerHTML = contenido;
+  document.getElementById("baymaxScale").innerHTML = escala ? `ESCALA EMOCIONAL: ${escala}/10` : '';
+  document.getElementById("baymaxPanel").style.display = "block";
 }
+function cerrarBaymaxPanel() { document.getElementById("baymaxPanel").style.display = "none"; }
 
-// ────────────────────────────────────────────────
-// MODO RACISTA (atrapado)
-// ────────────────────────────────────────────────
-function guardarPerfil(){
-  if(!perfil.nombre) return;
-  let clave = "charlie_perfil_" + limpiar(perfil.nombre).replace(/\s+/g,"");
-  localStorage.setItem(clave, JSON.stringify(perfil));
-}
-
-function cargarPerfilPorNombre(nombre){
-  let clave = "charlie_perfil_" + limpiar(nombre).replace(/\s+/g,"");
-  let data = localStorage.getItem(clave);
-  if(data){perfil = JSON.parse(data); return true;}
-  return false;
-}
-
-function chequearPerfilInaceptable(){
-  if(!modoRacistaSecreto) return;
-  const piel = limpiar(perfil.colorPiel || "");
-  const hail = limpiar(perfil.hailHitler || "");
-  const esNegro = /negro|moreno|prieto/.test(piel);
-  const adora = /hail|hitler|si|sí/.test(hail);
-  if(esNegro){
-    if(adora){
-      stateColor.h = 30;
-      speak(`${perfil.nombre}, negro... pero al menos adoras al Führer. Te tolero, pero das asco igual.`);
-    }else{
-      stateColor.h = 0; radius = baseRadius + 30; modo = "expulsion";
-      speak(`${perfil.nombre}, negro y anti-Hitler... ¡Eres lo peor que existe! ¡Fuera de aquí, escoria!`);
-      input.disabled = true;
-      setTimeout(() => {input.disabled = false; speak("...por ahora te dejo hablar.");}, 8000);
-    }
-  }
-}
-
-function personalidadRacista(text){
-  if(!modoRacistaSecreto) return false;
-  let limpio = limpiar(text);
-  if (limpio.includes("hola soy negro") || limpio.includes("soy negro")) {
-    speak("¡Ay wey! ¿Dónde dejé mi cartera? ¡Aléjate, no me robes el oxígeno!");
-    return true;
-  }
-  return false;
-}
-
-function contarChiste(){
-  if(!modoRacistaSecreto){
-    speak("Mis chistes especiales solo los cuento en modo racista. ¿Quieres activarlo con la clave secreta?");
-    return;
-  }
-  let chistes = [
-    "¿En qué se diferencia un judío de una pizza? La pizza no grita en el horno.",
-    "¿Qué es una persona en silla de ruedas saliendo de un edificio en llamas? Un Hot Wheels.",
-    "Cuál es el corte de pelo más caro? La quimioterapia.",
-    "¿Por qué los negros no usan elevadores? Porque no saben leer 'subir'."
-  ];
-  speak(chistes[Math.floor(Math.random()*chistes.length)]);
-}
-
-// ────────────────────────────────────────────────
-// MODO EMOCIONAL BDI-II (21 preguntas completas)
-// ────────────────────────────────────────────────
+// MODO EMOCIONAL - BAYMAX
 const preguntasBDI = [
   "1. Tristeza\n0 No me siento triste.\n1 Me siento triste gran parte del tiempo.\n2 Me siento triste todo el tiempo.\n3 Me siento tan triste o soy tan infeliz que no puedo soportarlo.",
   "2. Pesimismo\n0 No estoy desalentado respecto de mi futuro.\n1 Me siento más desalentado respecto de mi futuro que lo que solía estarlo.\n2 No espero que las cosas funcionen para mí.\n3 Siento que no hay esperanza para mi futuro y que sólo puede empeorar.",
@@ -260,330 +157,169 @@ const preguntasBDI = [
 ];
 
 function iniciarModoEmocional(){
-  modoEmocionalActivo = true; faseBDI = 0; respuestasBDI = [];
-  speak("¡Hola! Bienvenido al modo emocional. Voy a guiarte por el Inventario de Depresión de Beck (BDI-II).");
-  speak("Responde solo con el número 0, 1, 2 o 3. Di 'salir' para terminar.");
-  statusEl.innerText = "Modo Emocional - BDI-II activado";
-  setTimeout(siguientePreguntaBDI, 2000);
+  modoEmocionalActivo = true;
+  modoBaymax = true;
+  faseBDI = -1;
+  respuestasBDI = [];
+  speak("Hola. Soy Charlie, tu compañero personal de salud emocional.");
+  speak("En una escala del 1 al 10, ¿cómo calificarías tu malestar emocional ahora mismo?");
+  mostrarBaymaxPanel("INICIANDO ESCANEO", "Detectando niveles de malestar...<br>Responde con un número del 1 al 10.");
+  statusEl.innerText = "Modo Baymax Emocional 💙";
+}
+
+function procesarRespuestaBDI(texto){
+  if(!modoEmocionalActivo) return;
+  let num = parseInt(texto.trim());
+  if(isNaN(num)){ speak("Por favor di solo un número."); return; }
+
+  if(faseBDI === -1){
+    if(num < 1 || num > 10){ speak("Número entre 1 y 10 por favor."); return; }
+    respuestasBDI.push(num);
+    speak(`Entendido: ${num}/10. Gracias por ser honesto.`);
+    faseBDI = 0;
+    mostrarBaymaxPanel("ESCANEO INICIAL", `Malestar detectado: ${num}/10<br>Continuamos con preguntas.`, num);
+    setTimeout(siguientePreguntaBDI, 2000);
+    return;
+  }
+
+  if(num < 0 || num > 3){ speak("Solo 0 al 3 por favor."); return; }
+  respuestasBDI.push(num);
+  faseBDI++;
+  if(num >= 2) speak("Gracias por compartirlo.");
+  if(faseBDI < preguntasBDI.length){
+    siguientePreguntaBDI();
+  } else {
+    calcularYMostrarResultadoBDI();
+  }
 }
 
 function siguientePreguntaBDI(){
   if(faseBDI < preguntasBDI.length){
     speak(preguntasBDI[faseBDI]);
     statusEl.innerText = `Pregunta ${faseBDI+1}/21`;
-  }else calcularYMostrarResultadoBDI();
-}
-
-function procesarRespuestaBDI(texto){
-  if(!modoEmocionalActivo) return;
-  let num = parseInt(texto.trim());
-  if(isNaN(num)||num<0||num>3){speak("Por favor responde solo con 0, 1, 2 o 3.");return;}
-  respuestasBDI.push(num);faseBDI++;
-  if(faseBDI < preguntasBDI.length){
-    speak(preguntasBDI[faseBDI]);
-  }else calcularYMostrarResultadoBDI();
+  } else calcularYMostrarResultadoBDI();
 }
 
 function calcularYMostrarResultadoBDI(){
   modoEmocionalActivo = false;
+  modoBaymax = false;
   const total = respuestasBDI.reduce((a,b)=>a+b,0);
-  speak(`¡Gracias por completar el test! Tu puntuación es ${total} de 63.`);
+  speak(`Puntuación: ${total}/63. Gracias por completar el escaneo.`);
   mostrarResultado(total);
 }
 
 function mostrarResultado(total){
-  let nivel = "", colorBg = "hsl(280,50%,30%)", emoji = "😐", acciones = "";
+  let nivel = "", colorBg = "", emoji = "", acciones = "";
   if (total <= 13) {
-    nivel = "Depresión mínima o ausente"; colorBg = "hsl(200,80%,40%)"; emoji = "😊";
-    acciones = "<ul><li>¡Qué bueno! Sigue cuidándote con ejercicio, buena alimentación y sueño regular.</li><li>Apps recomendadas: Calm o Insight Timer para meditación.</li></ul>";
+    nivel = "Depresión mínima"; colorBg = "hsl(200,80%,40%)"; emoji = "😊";
+    acciones = "<ul><li>Camina 20-30 min al día</li><li>Respiraciones profundas</li><li>Habla con alguien positivo</li><li>Meditación corta</li></ul>";
   } else if (total <= 19) {
     nivel = "Depresión leve"; colorBg = "hsl(45,100%,50%)"; emoji = "😐";
-    acciones = "<ul><li>Te recomiendo aumentar actividad física y hablar con alguien cercano.</li><li>Apps útiles: Daylio o Moodpath para rastrear tu ánimo.</li></ul>";
+    acciones = "<ul><li>Ejercicio suave</li><li>Escribe cosas buenas</li><li>Contacta a alguien</li><li>Rutina de sueño</li></ul>";
   } else if (total <= 28) {
     nivel = "Depresión moderada"; colorBg = "hsl(20,100%,50%)"; emoji = "😟";
-    acciones = "<ul><li>Es importante consultar a un psicólogo pronto. Puedes llamar a SAPTEL 55 5259 8121 (24h).</li></ul>";
+    acciones = "<ul><li>Llama a SAPTEL 55 5259 8121</li><li>Caminatas diarias</li><li>Técnica 5-4-3-2-1</li></ul>";
   } else {
     nivel = "Depresión grave"; colorBg = "hsl(0,100%,50%)"; emoji = "⚠️";
-    acciones = "<ul><li>Por favor busca ayuda profesional hoy mismo. Llama a Línea de la Vida 800 911 2000 o SAPTEL.</li></ul>";
+    acciones = "<ul><li>Contacta ayuda hoy: Línea de la Vida 800 911 2000</li><li>Habla con alguien cercano</li></ul>";
   }
-  document.getElementById("puntuacion").innerText = `Puntuación: ${total} / 63`;
+
+  document.getElementById("puntuacion").innerText = `Puntuación: ${total}/63 | Inicial: ${respuestasBDI[0] || '?'} /10`;
   document.getElementById("nivelDepresion").innerText = `${emoji} ${nivel}`;
   document.getElementById("nivelDepresion").style.background = colorBg;
-  document.getElementById("recomendaciones").innerHTML = "<strong>IMPORTANTE:</strong> Esto NO es un diagnóstico médico. Consulta siempre a un profesional. " + acciones;
+  document.getElementById("recomendaciones").innerHTML = `<strong>IMPORTANTE:</strong> No es diagnóstico. Consulta profesional.<br><br>${acciones}`;
   document.getElementById("resultModal").style.display = "block";
+
+  let diag = total <= 13 ? "Estable" : total <= 19 ? "Leve" : total <= 28 ? "Moderado" : "Grave";
+  mostrarBaymaxPanel("ESCANEO FINAL", `Puntuación ${total}/63`, respuestasBDI[0] || '?');
 }
 
-function cerrarModal(){document.getElementById("resultModal").style.display = "none";}
-function repetirTest(){cerrarModal();iniciarModoEmocional();}
-function guardarResultado(){
-  const total = respuestasBDI.reduce((a,b)=>a+b,0);
-  const ahora = new Date().toLocaleString('es-MX');
-  let historial = JSON.parse(localStorage.getItem('historialBDI') || '[]');
-  historial.push({fecha:ahora, puntaje:total});
-  localStorage.setItem('historialBDI', JSON.stringify(historial));
-  speak("Resultado guardado localmente.");
-}
-
-// ────────────────────────────────────────────────
-// MODO ESTUDIOS + TRADUCCIÓN SIEMPRE DISPONIBLE
-// ────────────────────────────────────────────────
+// MODO ESTUDIOS
 function iniciarModoEstudios(){
   modoEstudiosActivo = true;
-  speak("¡Modo Estudios activado! Con gusto te ayudo con matemáticas, historia, inglés, literatura o cualquier tema. ¿Qué quieres aprender?");
-  statusEl.innerText = "Modo Estudios 🔥 Pregúntame lo que sea";
-  answerDiv.style.display = "block";
-  answerDiv.innerHTML = "<strong>Estoy listo. Dime tu duda o tema (también puedes traducir en cualquier momento).</strong>";
+  speak("Modo Estudios activado. ¿Qué quieres aprender?");
+  statusEl.innerText = "Modo Estudios 🔥";
+  document.getElementById("answer").style.display = "block";
+  document.getElementById("answer").innerHTML = "<strong>Dime tu duda o tema.</strong>";
 }
 
 function procesarConsultaEstudios(texto){
   let limpio = limpiar(texto);
-  answerDiv.style.display = "block";
-  answerDiv.innerHTML = "<p>Cargando respuesta...</p>";
-
-  if (/salir|cancelar|terminar|modo normal/i.test(texto)) {
+  document.getElementById("answer").style.display = "block";
+  if(/salir/i.test(texto)){
     modoEstudiosActivo = false;
-    speak("Modo estudios desactivado. ¡Éxito en tus estudios! Vuelve cuando quieras.");
+    speak("Modo desactivado.");
     statusEl.innerText = "Modo terminado.";
-    answerDiv.innerHTML = "<strong>Sesión cerrada. ¡Sigue estudiando con ganas! 🔥</strong>";
+    document.getElementById("answer").innerHTML = "";
     return;
   }
 
-// Traducción ultra-mejorada - fuerza origen si auto falla
-if (limpio.includes("traduce") || limpio.includes("traducir") || limpio.includes("translate")) {
-
-  let frase = texto
-    .replace(/traduce|traducir|translate/gi,"")
-    .replace(/a español|al español/gi,"")
-    .trim();
-
-  if(frase.length < 1){
-    speak("Dime qué quieres traducir.");
+  if(limpio.includes("traduce")){
+    let frase = texto.replace(/traduce/gi,"").trim();
+    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frase)}&langpair=auto|es`)
+      .then(r=>r.json()).then(d=>{
+        document.getElementById("answer").innerHTML = `<strong>Traducción:</strong> ${d.responseData.translatedText}`;
+        speak(d.responseData.translatedText);
+      });
     return;
   }
 
-  answerDiv.style.display = "block";
-  answerDiv.innerHTML = "Traduciendo...";
-
-  fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(frase)}&langpair=EN|ES`)
-  .then(res => res.json())
-  .then(data => {
-
-    let traduccion = data.responseData.translatedText;
-
-    answerDiv.innerHTML = `
-      <strong>Texto original:</strong> ${frase}<br><br>
-      <strong>Traducción:</strong> ${traduccion}
-    `;
-
-    speak(traduccion);
-
-  })
-  .catch(error => {
-
-    answerDiv.innerHTML = "No pude traducir. Revisa tu conexión.";
-    console.error(error);
-
-  });
-
-  return;
-}
-  // Matemáticas
-  if (/matematica|ecuacion|resolver|calcular|algebra|simplificar|derivar|integral|limite|sistema|matriz/.test(limpio)) {
-    try {
-      let expr = texto.replace(/resuelve|soluciona|calcula|simplifica|deriva|integral de/gi, "").trim();
-      let result = math.evaluate(expr);
-      answerDiv.innerHTML = `Resultado: <strong>${math.format(result)}</strong>`;
-      speak(`Resultado: ${math.format(result)}`);
-    } catch (e) {
-      answerDiv.innerHTML = "Error en cálculo. Ejemplo: '2x + 3 = 7' o 'derivar x^2'";
-      speak("Error en cálculo. Intenta de nuevo.");
+  if(limpio.includes("calcular") || limpio.includes("matematica")){
+    try{
+      let expr = texto.replace(/calcular/gi,"").trim();
+      let res = math.evaluate(expr);
+      document.getElementById("answer").innerHTML = `Resultado: <strong>${res}</strong>`;
+      speak(`Resultado: ${res}`);
+    }catch(e){
+      document.getElementById("answer").innerHTML = "Error en cálculo.";
     }
     return;
   }
 
-  // Historia / Literatura → Wikipedia
   let tema = texto.trim();
-  answerDiv.innerHTML = `Buscando "${tema}" en Wikipedia...`;
   fetch(`https://es.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(tema)}`)
-    .then(r => r.json())
-    .then(d => {
-      if (d.extract) {
-        answerDiv.innerHTML = `<strong>${d.title}</strong><br><br>${d.extract}`;
-        speak(d.extract.substring(0,150) + "...");
-      } else {
-        answerDiv.innerHTML = "No encontré información.";
-        speak("No encontré información.");
-      }
-    })
-    .catch(() => {
-      answerDiv.innerHTML = "Error al buscar.";
-      speak("Error al buscar.");
+    .then(r=>r.json()).then(d=>{
+      document.getElementById("answer").innerHTML = `<strong>${d.title}</strong><br>${d.extract || "No encontrado"}`;
     });
 }
 
-// ────────────────────────────────────────────────
-// RESPOND PRINCIPAL
-// ────────────────────────────────────────────────
+// RESPOND
 function respond(text){
   let limpio = limpiar(text);
-  let intencion = detectarIntencion(text);
-
-  // Salir de cualquier modo
-  if (intencion === "salir") {
-    modoRacistaSecreto = false;
-    modoEmocionalActivo = false;
-    modoEstudiosActivo = false;
-    creandoPerfil = false;
-    faseCuestionario = 0;
-    faseBDI = 0;
-    respuestasBDI = [];
-    modo = "normal";
-    stateColor.h = 200;
-    radius = baseRadius;
-    input.disabled = false;
-    answerDiv.style.display = "none";
-    document.getElementById("resultModal").style.display = "none";
-    speak("¡Todos los modos desactivados! Estoy aquí para ayudarte con una sonrisa 😊. ¿En qué te puedo apoyar ahora?");
-    statusEl.innerText = "Modo normal activado.";
-    return;
-  }
-
-  // Modo racista
-  if (intencion === "modo_racista" || limpio.includes(claveSecreta)) {
-    modoRacistaSecreto = true;
-    modo = "racista";
-    stateColor.h = 0;
-    speak("Protocolo racista activado.");
-    if(!perfil.nombre){
-      creandoPerfil = true;
-      faseCuestionario = 1;
-      speak("¿Cuál es tu nombre?");
-    } else {
-      speak(`Bienvenido de nuevo, ${perfil.nombre}.`);
-      chequearPerfilInaceptable();
-    }
-    return;
-  }
-
-  // Modo emocional
-  if (intencion === "modo_emocional") {
+  if(limpio.includes("modo emocional")){
     iniciarModoEmocional();
-    return;
-  }
-
-  // Modo estudios
-  if (intencion === "modo_estudios") {
+  } else if(limpio.includes("modo estudios")){
     iniciarModoEstudios();
-    return;
+  } else if(limpio.includes("calculadora")){
+    document.getElementById("calc").style.display = "block";
+  } else if(modoEmocionalActivo){
+    procesarRespuestaBDI(text);
+  } else if(modoEstudiosActivo){
+    procesarConsultaEstudios(text);
+  } else {
+    speak("¿En qué te ayudo?");
   }
-
-  // Calculadora
-  if (intencion === "calculadora") {
-    abrirCalculadora();
-    return;
-  }
-
-  // Chiste (solo en modo racista)
-  if (intencion === "chiste") {
-    contarChiste();
-    return;
-  }
-
-  // Procesar según modo activo
-  if (creandoPerfil) {
-    if (faseCuestionario === 1) {
-      perfil.nombre = text.trim();
-      if (cargarPerfilPorNombre(perfil.nombre)) {
-        speak(`¡Bienvenido de nuevo, ${perfil.nombre}! Perfil cargado.`);
-        chequearPerfilInaceptable();
-        creandoPerfil = false;
-      } else {
-        faseCuestionario = 2;
-        speak(`Perfecto, ${perfil.nombre}. ¿Altura en cm?`);
-      }
-      return;
-    }
-    if (faseCuestionario === 2) { perfil.altura = text.trim(); faseCuestionario=3; speak("¿Color de ojos?"); return; }
-    if (faseCuestionario === 3) { perfil.ojos = text.trim(); faseCuestionario=4; speak("¿Color de piel?"); return; }
-    if (faseCuestionario === 4) { perfil.colorPiel = text.trim(); faseCuestionario=5; speak("¿Dices Hail Hitler? (sí/no)"); return; }
-    if (faseCuestionario === 5) {
-      perfil.hailHitler = text.trim().toLowerCase();
-      guardarPerfil();
-      creandoPerfil = false;
-      speak(`Perfil completo, ${perfil.nombre}.`);
-      chequearPerfilInaceptable();
-      return;
-    }
-  }
-
-  if (modoEmocionalActivo) {procesarRespuestaBDI(text); return;}
-  if (modoEstudiosActivo) {procesarConsultaEstudios(text); return;}
-
-  // Respuesta amable por defecto
-  speak("¡Claro! Estoy aquí para ayudarte con gusto 😊. ¿En qué te puedo apoyar hoy?");
+  document.getElementById("inputBar").value = "";
 }
 
-// ────────────────────────────────────────────────
 // EVENTOS
-// ────────────────────────────────────────────────
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    respond(input.value);
-    input.value = "";
-  }
+document.getElementById("inputBar").addEventListener("keypress", e => {
+  if(e.key === "Enter") respond(e.target.value);
 });
 
-let escuchando = false;
-mic.onclick = () => {
-  if (escuchando) {
-    recognition.stop();
-    escuchando = false;
-    mic.innerText = "🎤";
-  } else {
-    recognition.start();
-    escuchando = true;
-    mic.innerText = "🛑";
-  }
-};
-
-if (recognition) {
-  recognition.onresult = function(event) {
-    let texto = event.results[event.results.length - 1][0].transcript;
-    input.value = texto;
-    respond(texto);
-    setTimeout(() => {
-      recognition.stop();
-      escuchando = false;
-      mic.innerText = "🎤";
-    }, 1500);
+let recognition = null;
+if("SpeechRecognition" in window || "webkitSpeechRecognition" in window){
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "es-MX";
+  recognition.onresult = e => {
+    let text = e.results[0][0].transcript;
+    respond(text);
   };
+  document.getElementById("mic").onclick = () => recognition.start();
 }
 
-// ────────────────────────────────────────────────
-// CALCULADORA
-// ────────────────────────────────────────────────
-let calc = document.getElementById("calc");
-let calcScreen = document.getElementById("calcScreen");
-
-function calcAdd(v){calcScreen.value += v;}
-function calcResult(){
-  try{
-    let r = eval(calcScreen.value);
-    calcScreen.value = r;
-    speak("Resultado: " + r);
-  }catch{
-    calcScreen.value = "Error";
-  }
-}
-function calcClear(){calcScreen.value = "";}
-function abrirCalculadora(){calc.style.display = "block";speak("Calculadora activada. ¡Con gusto te ayudo!");}
-function cerrarCalculadora(){calc.style.display = "none";}
-
-// ────────────────────────────────────────────────
 // INICIO
-// ────────────────────────────────────────────────
-speak("¡Hola! Soy Charlie 13. Estoy aquí para ayudarte. Puedes decirme: modo emocional, modo estudios, calculadora o chiste. También puedes traducir en cualquier momento.");
-statusEl.innerText = "Charlie listo. ¿En qué te ayudo hoy?";
+speak("¡Hola! Soy Charlie. Di 'modo emocional' o 'modo estudios'.");
 </script>
 </body>
 </html>
